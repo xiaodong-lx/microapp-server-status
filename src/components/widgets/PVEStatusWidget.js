@@ -5,26 +5,28 @@ import { getAssetPath } from '../../utils/assetPath.js';
 
 export class PVEStatusWidget extends SunPanelWidgetElement {
   static properties = {
+    name: { type: String },
+    type: { type: String },
     loadavg: { type: String },
     cpu: { type: String },
     cpu_percent: { type: String },
     mem: { type: String },
     mem_percent: { type: String },
+    uptime: { type: String },
+    status: { type: String },
   };
-
 
   constructor() {
     super();
+    this.name = '-';
     this.loadavg = '-';
     this.cpu = '-';
     this.cpu_percent = '0';
     this.mem = '-';
     this.mem_percent = '0';
+    this.uptime = '-';
+    this.status = '-';
   }
-  /**
-   * 组件初始化完成后调用
-   * @returns {void}
-   */
   onInitialized() {
     this.getPVEStatus()
     var interval = this.spCtx.widgetInfo.config.interval;
@@ -41,11 +43,6 @@ export class PVEStatusWidget extends SunPanelWidgetElement {
     return getAssetPath(relativePath, this.spCtx.staticPath);
   }
 
-  /**
-   * 小部件信息变化时的回调函数
-   * @param {WidgetInfo} newWidgetInfo - 新的小部件信息
-   * @param {WidgetInfo} oldWidgetInfo - 旧的小部件信息
-   */
   onWidgetInfoChanged(newWidgetInfo, oldWidgetInfo) {
     this.requestUpdate();
   }
@@ -63,14 +60,35 @@ export class PVEStatusWidget extends SunPanelWidgetElement {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
   }
 
+  formatUptime(seconds) {
+    const days = Math.floor(seconds / 86400);
+    const hours = Math.floor(seconds / 3600) % 24;
+    const minutes = Math.floor(seconds / 60) % 60;
+
+    return `${days}d ${hours}h ${minutes}m`;
+  }
+
   async getPVEStatus() {
     try {
       const host = this.spCtx.widgetInfo.config.host;
       const token = this.spCtx.widgetInfo.config.token;
       const node = this.spCtx.widgetInfo.config.node;
+      const qemuid = this.spCtx.widgetInfo.config.qemuid;
+      const lxcid = this.spCtx.widgetInfo.config.lxcid;
+
+      var targetUrl = `${host}/api2/json/nodes/${node}/status`;
+      this.type = "node";
+      if (qemuid) {
+        targetUrl = `${host}/api2/json/nodes/${node}/qemu/${qemuid}/status/current`
+        this.type = "qemu";
+      } else if (lxcid) {
+        targetUrl = `${host}/api2/json/nodes/${node}/lxc/${lxcid}/status/current`
+        this.type = "lxc";
+      }
+
       const response = await this.spCtx.api.network.request({
         request: {
-          targetUrl: `${host}/api2/json/nodes/${node}/status`,
+          targetUrl: targetUrl,
           method: 'GET',
           headers: {
             "Authorization": `PVEAPIToken ${token}`
@@ -79,19 +97,29 @@ export class PVEStatusWidget extends SunPanelWidgetElement {
       });
 
       var data = response.data?.data;
-      this.loadavg = data.loadavg.join(", ");
-      this.cpu = Math.round(data.cpu * 100, 0) + "%";
-      this.cpu_percent = Math.round(data.cpu * 100, 0);
-      this.mem = `${this.formatBytes(data.memory.used, 1)}/${this.formatBytes(data.memory.total, 1)}`;
-      this.mem_percent = parseFloat(data.memory.used) / parseFloat(data.memory.total) * 100
+      if (this.type == "node") {
+        this.name = node;
+        this.loadavg = data.loadavg.join(", ");
+        this.cpu = Math.round(data.cpu * 100, 0) + "%";
+        this.cpu_percent = Math.round(data.cpu * 100, 0);
+        this.mem = `${this.formatBytes(data.memory.used, 1)}/${this.formatBytes(data.memory.total, 1)}`;
+        this.mem_percent = parseFloat(data.memory.used) / parseFloat(data.memory.total) * 100;
+        this.uptime = this.formatUptime(data.uptime);
+      } else if (this.type == "qemu" || this.type == "lxc") {
+        this.name = `${data.name} (${data.vmid})`;
+        this.cpu = Math.round(data.cpu * 100, 0) + "%";
+        this.cpu_percent = Math.round(data.cpu * 100, 0);
+        this.mem = `${this.formatBytes(data.mem, 1)}/${this.formatBytes(data.maxmem, 1)}`;
+        this.mem_percent = parseFloat(data.mem) / parseFloat(data.maxmem) * 100;
+        this.uptime = this.formatUptime(data.uptime);
+        this.status = data.status;
+      }
 
     } catch (error) {
       switch (error.type) {
         case 'microApp':
-          // 微应用错误（权限不足等）
           break;
         case 'targetUrl':
-          // 目标站点返回的错误
           break;
         default:
           console.error(error);
@@ -103,13 +131,19 @@ export class PVEStatusWidget extends SunPanelWidgetElement {
     return html`
       <div class="container">
         <div class="info-item">
-          <span class="label">Node</span>
-          <span class="value">${this.spCtx.widgetInfo.config.node}</span>
+          <span class="label">Name</span>
+          <span class="value">${this.name}</span>
         </div>
+        ${this.type == "qemu" || this.type == "lxc" ? html`
+        <div class="info-item">
+          <span class="label">Status</span>
+          <span class="value">${this.status}</span>
+        </div>` : ""}
+        ${this.type == "node" ? html`
         <div class="info-item">
           <span class="label">Loadavg</span>
           <span class="value">${this.loadavg}</span>
-        </div>
+        </div>` : ""}
         <div class="info-item">
           <span class="label">CPU</span>
           <span class="value">${this.cpu}</span>
@@ -124,12 +158,14 @@ export class PVEStatusWidget extends SunPanelWidgetElement {
         <div class="progress-bar">
           <div class="progress-bar-line" style="max-width: ${this.mem_percent}%"></div>
         </div>
+        <div class="info-item">
+          <span class="label">Uptime</span>
+          <span class="value">${this.uptime}</span>
+        </div>
       </div>
     `;
   }
 
-
-  // 定义样式
   static styles = css`
     .container {
       padding: 8px 12px;
@@ -169,18 +205,5 @@ export class PVEStatusWidget extends SunPanelWidgetElement {
       line-height: 5px;
       border-radius: 2.5px;
     }
-
-    .container[dark] { background: #333; }
-    .container[dark] .title { color: #fff; }
-    .container[dark] .value { color: #eee; }
-    .container[dark] .label { color: #aaa; }
-    .container[dark] .info-item { background: rgba(255,255,255,0.1); }
-    .container[dark] .static-path { background: rgba(255,255,255,0.1); }
-    .container[dark] .info-btn { background: rgba(255,255,255,0.1); color: #ccc; }
-    .container[dark] .info-panel { background: rgba(30,30,30,0.98); color: #ccc; }
-    .container[dark] .log-item { color: #777; }
-    .container[dark] .mini-info div { color: #eee; }
   `;
 }
-
-

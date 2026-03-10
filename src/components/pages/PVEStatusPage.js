@@ -11,6 +11,8 @@ export class PVEStatusWidgetPage extends SunPanelPageElement {
     host: { type: String },
     token: { type: String },
     node: { type: String },
+    qemuid: { type: Number },
+    lxcid: { type: Number },
     interval: { type: Number }
   };
 
@@ -23,6 +25,8 @@ export class PVEStatusWidgetPage extends SunPanelPageElement {
     this.host = config.host ?? '';
     this.token = config.token ?? '';
     this.node = config.node ?? '';
+    this.qemuid = config.qemuid ?? 0;
+    this.lxcid = config.lxcid ?? 0;
     this.interval = Math.min(Math.max(parseInt(config.interval ?? INTERVAL_DEFAULT), INTERVAL_MIN), INTERVAL_MAX);
     this.requestUpdate();
   }
@@ -52,6 +56,8 @@ export class PVEStatusWidgetPage extends SunPanelPageElement {
         host: this.host,
         token: this.token,
         node: this.node,
+        qemuid: this.qemuid,
+        lxcid: this.lxcid,
         interval: Math.min(Math.max(parseInt(this.interval ?? INTERVAL_DEFAULT), INTERVAL_MIN), INTERVAL_MAX)
       },
     });
@@ -69,7 +75,7 @@ export class PVEStatusWidgetPage extends SunPanelPageElement {
           height: 100%;
           width: 100%;
           box-sizing: border-box;
-          color: ${darkMode ? '#e5e5e5' : '#262626'};
+          color: #262626;
           display: flex;
           flex-direction: column;
         }
@@ -83,22 +89,22 @@ export class PVEStatusWidgetPage extends SunPanelPageElement {
         .content-wrapper::-webkit-scrollbar { width: 6px; }
         .content-wrapper::-webkit-scrollbar-track { background: transparent; }
         .content-wrapper::-webkit-scrollbar-thumb {
-          background: ${darkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)'};
+          background: rgba(0,0,0,0.15);
           border-radius: 3px;
         }
         .content-wrapper::-webkit-scrollbar-thumb:hover {
-          background: ${darkMode ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.25)'};
+          background: rgba(0,0,0,0.25);
         }
         
         h1 { color: #1890ff; margin: 0 0 4px; font-size: 18px; font-weight: 600; }
         .subtitle { color: #8c8c8c; margin-bottom: 16px; font-size: 12px; }
         
         .form-section {
-          background: ${darkMode ? 'rgba(38,38,38,0.7)' : 'rgba(250,250,250,0.7)'};
+          background: rgba(250,250,250,0.7);
           border-radius: 6px;
           padding: 12px;
           margin-bottom: 12px;
-          border: 1px solid ${darkMode ? 'rgba(48,48,48,0.8)' : 'rgba(232,232,232,0.8)'};
+          border: 1px solid rgba(232,232,232,0.8);
           backdrop-filter: blur(10px);
           -webkit-backdrop-filter: blur(10px);
         }
@@ -107,7 +113,7 @@ export class PVEStatusWidgetPage extends SunPanelPageElement {
           font-size: 14px;
           font-weight: 600;
           margin-bottom: 12px;
-          color: ${darkMode ? '#e5e5e5' : '#262626'};
+          color: #262626;
           display: flex;
           align-items: center;
         }
@@ -130,17 +136,17 @@ export class PVEStatusWidgetPage extends SunPanelPageElement {
           margin-bottom: 6px;
           font-weight: 500;
           font-size: 13px;
-          color: ${darkMode ? '#d9d9d9' : '#595959'};
+          color: #595959;
         }
         
         input.styled-input {
           width: 100%;
           padding: 8px 12px;
-          border: 1px solid ${darkMode ? '#303030' : '#d9d9d9'};
+          border: 1px solid #d9d9d9;
           border-radius: 4px;
           font-size: 13px;
-          color: ${darkMode ? '#e5e5e5' : '#262626'};
-          background: ${darkMode ? '#1a1a1a' : '#fff'};
+          color: #262626;
+          background: #fff;
           box-sizing: border-box;
           transition: all 0.2s ease;
         }
@@ -151,27 +157,13 @@ export class PVEStatusWidgetPage extends SunPanelPageElement {
           box-shadow: 0 0 0 3px rgba(24,144,255,0.1);
         }
         
-        .debug-info {
-          background: ${darkMode ? '#1a1a1a' : '#f5f5f5'};
-          border: 1px dashed ${darkMode ? '#303030' : '#d9d9d9'};
-          border-radius: 4px;
-          padding: 10px;
-          margin: 12px 0;
-          font-family: monospace;
-          font-size: 11px;
-          color: #8c8c8c;
-          word-break: break-all;
-          max-height: 150px;
-          overflow-y: auto;
-        }
-        
         .button-container {
           display: flex;
           justify-content: flex-end;
           gap: 8px;
           margin-top: 12px;
           padding-top: 12px;
-          border-top: 1px solid ${darkMode ? '#303030' : '#e8e8e8'};
+          border-top: 1px solid #e8e8e8;
           flex-shrink: 0;
         }
         
@@ -248,6 +240,28 @@ export class PVEStatusWidgetPage extends SunPanelPageElement {
                   .value="${this.interval}"
                   @input="${(e) => this.interval = e.target.value}"
                   placeholder="Interval"
+                  class="styled-input"
+                >
+                </div>
+              <div class="form-group">
+                <label for="qemuid">虚拟机 ID</label>
+                <input
+                  type="number"
+                  name="qemuid"
+                  .value="${this.qemuid}"
+                  @input="${(e) => this.qemuid = e.target.value}"
+                  placeholder="100 - 999999999，或留空"
+                  class="styled-input"
+                >
+                </div>
+              <div class="form-group">
+                <label for="lxcid">LXC ID</label>
+                <input
+                  type="number"
+                  name="lxcid"
+                  .value="${this.lxcid}"
+                  @input="${(e) => this.lxcid = e.target.value}"
+                  placeholder="100 - 999999999，或留空"
                   class="styled-input"
                 >
                 </div>
