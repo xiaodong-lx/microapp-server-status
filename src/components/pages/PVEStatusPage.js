@@ -1,12 +1,17 @@
 import { SunPanelPageElement } from '@sun-panel/micro-app';
 import { html } from 'lit';
 
+const INTERVAL_MAX = 10
+const INTERVAL_MIN = 0
+const INTERVAL_DEFAULT = 3
+
 export class PVEStatusWidgetPage extends SunPanelPageElement {
   static properties = {
     widgetInfo: { type: Object },
     host: { type: String },
     token: { type: String },
-    node: { type: String }
+    node: { type: String },
+    interval: { type: Number }
   };
 
   /**
@@ -18,6 +23,7 @@ export class PVEStatusWidgetPage extends SunPanelPageElement {
     this.host = config.host ?? '';
     this.token = config.token ?? '';
     this.node = config.node ?? '';
+    this.interval = Math.min(Math.max(parseInt(config.interval ?? INTERVAL_DEFAULT), INTERVAL_MIN), INTERVAL_MAX);
     this.requestUpdate();
   }
 
@@ -45,7 +51,8 @@ export class PVEStatusWidgetPage extends SunPanelPageElement {
         ...this.widgetInfo.config,
         host: this.host,
         token: this.token,
-        node: this.node
+        node: this.node,
+        interval: Math.min(Math.max(parseInt(this.interval ?? INTERVAL_DEFAULT), INTERVAL_MIN), INTERVAL_MAX)
       },
     });
   }
@@ -221,13 +228,26 @@ export class PVEStatusWidgetPage extends SunPanelPageElement {
                 >
                 </div>
               <div class="form-group">
-                <label for="Node">Node</label>
+                <label for="node">Node</label>
                 <input
                   type="text"
                   name="node"
                   .value="${this.node}"
                   @input="${(e) => this.node = e.target.value}"
                   placeholder="Node"
+                  class="styled-input"
+                >
+                </div>
+              <div class="form-group">
+                <label for="interval">刷新间隔（0-10，0为不刷新）</label>
+                <input
+                  type="number"
+                  name="interval"
+                  min="${INTERVAL_MIN}"
+                  max="${INTERVAL_MAX}"
+                  .value="${this.interval}"
+                  @input="${(e) => this.interval = e.target.value}"
+                  placeholder="Interval"
                   class="styled-input"
                 >
                 </div>

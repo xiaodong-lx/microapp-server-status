@@ -7,7 +7,9 @@ export class PVEStatusWidget extends SunPanelWidgetElement {
   static properties = {
     loadavg: { type: String },
     cpu: { type: String },
+    cpu_percent: { type: String },
     mem: { type: String },
+    mem_percent: { type: String },
   };
 
 
@@ -15,7 +17,9 @@ export class PVEStatusWidget extends SunPanelWidgetElement {
     super();
     this.loadavg = '-';
     this.cpu = '-';
+    this.cpu_percent = '0';
     this.mem = '-';
+    this.mem_percent = '0';
   }
   /**
    * 组件初始化完成后调用
@@ -23,9 +27,13 @@ export class PVEStatusWidget extends SunPanelWidgetElement {
    */
   onInitialized() {
     this.getPVEStatus()
-    setInterval(() => {
-      this.getPVEStatus()
-    }, 2000);
+    var interval = this.spCtx.widgetInfo.config.interval;
+
+    if (interval > 1) {
+      setInterval(() => {
+        this.getPVEStatus();
+      }, interval * 1000);
+    }
   }
 
   getAssetPath(relativePath) {
@@ -73,7 +81,9 @@ export class PVEStatusWidget extends SunPanelWidgetElement {
       var data = response.data?.data;
       this.loadavg = data.loadavg.join(", ");
       this.cpu = Math.round(data.cpu * 100, 0) + "%";
+      this.cpu_percent = Math.round(data.cpu * 100, 0);
       this.mem = `${this.formatBytes(data.memory.used, 1)}/${this.formatBytes(data.memory.total, 1)}`;
+      this.mem_percent = parseFloat(data.memory.used) / parseFloat(data.memory.total) * 100
 
     } catch (error) {
       switch (error.type) {
@@ -89,32 +99,31 @@ export class PVEStatusWidget extends SunPanelWidgetElement {
     }
   }
 
-
-  // ===================
-  // 各个尺寸的局部渲染方法
-  // ===================
-
-  renderDefault(data) {
-    return html`
-      <div class="info-item">
-        <span class="label">Loadavg</span>
-        <span class="value">${this.loadavg}</span>
-      </div>
-      <div class="info-item">
-        <span class="label">CPU</span>
-        <span class="value">${this.cpu}</span>
-      </div>
-      <div class="info-item">
-        <span class="label">Mem</span>
-        <span class="value">${this.mem}</span>
-      </div>
-    `;
-  }
-
   render() {
     return html`
       <div class="container">
-        ${this.renderDefault()}
+        <div class="info-item">
+          <span class="label">Node</span>
+          <span class="value">${this.spCtx.widgetInfo.config.node}</span>
+        </div>
+        <div class="info-item">
+          <span class="label">Loadavg</span>
+          <span class="value">${this.loadavg}</span>
+        </div>
+        <div class="info-item">
+          <span class="label">CPU</span>
+          <span class="value">${this.cpu}</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-bar-line" style="max-width: ${this.cpu_percent}%"></div>
+        </div>
+        <div class="info-item">
+          <span class="label">RAM</span>
+          <span class="value">${this.mem}</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-bar-line" style="max-width: ${this.mem_percent}%"></div>
+        </div>
       </div>
     `;
   }
@@ -134,6 +143,7 @@ export class PVEStatusWidget extends SunPanelWidgetElement {
     .info-item {
       display: flex;
       justify-content: space-between;
+      margin-top: 4px;
     }
     
     .label {
@@ -147,6 +157,19 @@ export class PVEStatusWidget extends SunPanelWidgetElement {
       font-weight: 500;
     }
     
+    .progress-bar {
+      background-color: rgba(207, 207, 207, 0.66);
+      height: 5px;
+      border-radius: 2.5px;
+    }
+    
+    .progress-bar-line {
+      background-color: rgba(145, 145, 145, 1);
+      height: 5px;
+      line-height: 5px;
+      border-radius: 2.5px;
+    }
+
     .container[dark] { background: #333; }
     .container[dark] .title { color: #fff; }
     .container[dark] .value { color: #eee; }
