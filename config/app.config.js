@@ -4,7 +4,7 @@ export default {
   version: '1.0.0',
   entry: 'main.js',
   icon: 'logo.png',
-  debug: true,
+  debug: false,
   appInfo: {
     'zh-CN': {
       appName: 'Server Status',
