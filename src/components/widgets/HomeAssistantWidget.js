@@ -40,14 +40,12 @@ export class HomeAssistantWidget extends SunPanelWidgetElement {
     try {
       const host = this.spCtx.widgetInfo.config.host;
       const token = this.spCtx.widgetInfo.config.token;
+      const template = this.spCtx.widgetInfo.config.template;
 
+      if (!host || !token) { return }
 
-      const template = [
-        '{{ states("sensor.ups_current_power") }}W {{ states("sensor.ups_status") }}',
-        '{{ states("sensor.a4c138168d42_temperature") }}℃ {{ states("sensor.nas_cpu_loadavg") }}',
-        'PROGRESS {{ float(states("sensor.nas_cpu_loadavg")) / 2 }}'];
       var body = {
-        template: template.join("\n")
+        template: template
       }
 
       const response = await this.spCtx.api.network.request({

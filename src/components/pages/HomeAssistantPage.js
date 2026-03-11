@@ -10,6 +10,7 @@ export class HomeAssistantPage extends SunPanelPageElement {
     widgetInfo: { type: Object },
     host: { type: String },
     token: { type: String },
+    template: { type: String },
     interval: { type: Number }
   };
 
@@ -18,6 +19,17 @@ export class HomeAssistantPage extends SunPanelPageElement {
     const config = widgetInfo?.config || {};
     this.host = config.host ?? '';
     this.token = config.token ?? '';
+    this.template = config.template ?? '\
+{% set my_test_json = { \n\
+  "temperature": 25, \n\
+  "unit": "°C" \n\
+} %} \n\
+\n\
+The temperature is {{ my_test_json.temperature }} {{ my_test_json.unit }}. \n\
+\n\
+Progress: \n\
+PROGRESS 0.1';
+
     this.interval = Math.min(Math.max(parseInt(config.interval ?? INTERVAL_DEFAULT), INTERVAL_MIN), INTERVAL_MAX);
     this.requestUpdate();
   }
@@ -43,6 +55,7 @@ export class HomeAssistantPage extends SunPanelPageElement {
         ...this.widgetInfo.config,
         host: this.host,
         token: this.token,
+        template: this.template,
         interval: Math.min(Math.max(parseInt(this.interval ?? INTERVAL_DEFAULT), INTERVAL_MIN), INTERVAL_MAX)
       },
     });
@@ -122,7 +135,8 @@ export class HomeAssistantPage extends SunPanelPageElement {
           font-size: 13px;
           color: #595959;
         }
-        
+
+        textarea.styled-input,
         input.styled-input {
           width: 100%;
           padding: 8px 12px;
@@ -135,6 +149,7 @@ export class HomeAssistantPage extends SunPanelPageElement {
           transition: all 0.2s ease;
         }
         
+        textarea.styled-input:focus,
         input.styled-input:focus {
           outline: none;
           border-color: #1890ff;
@@ -203,6 +218,17 @@ export class HomeAssistantPage extends SunPanelPageElement {
                   class="styled-input"
                 >
                 </div>
+              <div class="form-group">
+                <label for="template">Template</label>
+                <textarea
+                  name="template"
+                  rows="5"
+                  .value="${this.template}"
+                  @input="${(e) => this.template = e.target.value}"
+                  placeholder=""
+                  class="styled-input"
+                ></textarea>
+              </div>
               <div class="form-group">
                 <label for="interval">刷新间隔（${INTERVAL_MIN}-${INTERVAL_MAX}）</label>
                 <input

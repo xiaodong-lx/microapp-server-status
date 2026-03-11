@@ -70,6 +70,8 @@ export class PVEStatusWidget extends SunPanelWidgetElement {
       const qemuid = this.spCtx.widgetInfo.config.qemuid;
       const lxcid = this.spCtx.widgetInfo.config.lxcid;
 
+      if (!host || !token || !node) { return }
+
       var targetUrl = `${host}/api2/json/nodes/${node}/status`;
       this.type = "node";
       if (qemuid) {

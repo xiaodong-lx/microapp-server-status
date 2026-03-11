@@ -52,6 +52,8 @@ export class Aria2StatusWidget extends SunPanelWidgetElement {
       const url = this.spCtx.widgetInfo.config.url;
       const token = this.spCtx.widgetInfo.config.token;
 
+      if (!url || !token) { return }
+
       var body = {
         "jsonrpc": "2.0",
         "method": "aria2.getGlobalStat",
