@@ -1,7 +1,6 @@
 
 import { SunPanelWidgetElement, VERSION } from '@sun-panel/micro-app';
 import { html, css } from 'lit';
-import { getAssetPath } from '../../utils/assetPath.js';
 
 export class PVEStatusWidget extends SunPanelWidgetElement {
   static properties = {
@@ -28,19 +27,14 @@ export class PVEStatusWidget extends SunPanelWidgetElement {
     this.status = '-';
   }
   onInitialized() {
-    this.getPVEStatus()
+    this.getServerStatus()
     var interval = this.spCtx.widgetInfo.config.interval;
 
     if (interval > 1) {
       setInterval(() => {
-        this.getPVEStatus();
+        this.getServerStatus();
       }, interval * 1000);
     }
-  }
-
-  getAssetPath(relativePath) {
-    console.log('[getAssetPath] Called with:', { relativePath, staticPath: this.spCtx.staticPath });
-    return getAssetPath(relativePath, this.spCtx.staticPath);
   }
 
   onWidgetInfoChanged(newWidgetInfo, oldWidgetInfo) {
@@ -68,7 +62,7 @@ export class PVEStatusWidget extends SunPanelWidgetElement {
     return `${days}d ${hours}h ${minutes}m`;
   }
 
-  async getPVEStatus() {
+  async getServerStatus() {
     try {
       const host = this.spCtx.widgetInfo.config.host;
       const token = this.spCtx.widgetInfo.config.token;
@@ -130,6 +124,10 @@ export class PVEStatusWidget extends SunPanelWidgetElement {
   render() {
     return html`
       <div class="container">
+        <div class="info-item">
+          <span class="label"></span>
+          <span class="value"><strong>Proxmox VE</strong></span>
+        </div>
         <div class="info-item">
           <span class="label">Name</span>
           <span class="value">${this.name}</span>
