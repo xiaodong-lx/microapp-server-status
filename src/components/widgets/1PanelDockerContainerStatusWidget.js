@@ -78,7 +78,7 @@ export class OnePanelDockerContainerStatusWidget extends SunPanelWidgetElement {
       <div class="container">
         <div class="info-item">
           <span class="label"></span>
-          <span class="value"><strong>1Panel Contaienr</strong></span>
+          <span class="value"><strong>1Panel Container</strong></span>
         </div>
     ${this.state?.map(item => {
       return html`
