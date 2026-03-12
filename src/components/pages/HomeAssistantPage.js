@@ -5,6 +5,17 @@ const INTERVAL_MAX = 10
 const INTERVAL_MIN = 3
 const INTERVAL_DEFAULT = 3
 
+const TEMPLATE_DEFAULT = '{% set my_test_json = { \n\
+  "temperature": 25, \n\
+  "unit": "°C" \n\
+} %} \n\
+\n\
+The temperature is {{ my_test_json.temperature }} {{ my_test_json.unit }}. \n\
+\n\
+KV temperature:{{ my_test_json.temperature }} {{ my_test_json.unit }}\n\
+Progress: \n\
+PROGRESS 0.1'
+
 export class HomeAssistantPage extends SunPanelPageElement {
   static properties = {
     widgetInfo: { type: Object },
@@ -19,16 +30,7 @@ export class HomeAssistantPage extends SunPanelPageElement {
     const config = widgetInfo?.config || {};
     this.host = config.host ?? '';
     this.token = config.token ?? '';
-    this.template = config.template ?? '\
-{% set my_test_json = { \n\
-  "temperature": 25, \n\
-  "unit": "°C" \n\
-} %} \n\
-\n\
-The temperature is {{ my_test_json.temperature }} {{ my_test_json.unit }}. \n\
-\n\
-Progress: \n\
-PROGRESS 0.1';
+    this.template = config.template ?? TEMPLATE_DEFAULT;
 
     this.interval = Math.min(Math.max(parseInt(config.interval ?? INTERVAL_DEFAULT), INTERVAL_MIN), INTERVAL_MAX);
     this.requestUpdate();

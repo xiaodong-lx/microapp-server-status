@@ -25,6 +25,7 @@ export class HomeAssistantWidget extends SunPanelWidgetElement {
   onWidgetInfoChanged(newWidgetInfo, oldWidgetInfo) {
     this.requestUpdate();
   }
+
   extractProgress(str) {
     const regex = /^PROGRESS\s+(0(\.\d+)?|1(\.0+)?)$/;
     const match = str.match(regex);
@@ -34,6 +35,17 @@ export class HomeAssistantWidget extends SunPanelWidgetElement {
     }
 
     return -1;
+  }
+
+  extractKeyValue(str) {
+    const regex = /^KV\s+(.+):(.+)$/;
+    const match = str.match(regex);
+
+    if (match && match.length > 2) {
+      return { key: match[1].trim(), value: match[2].trim() };
+    }
+
+    return null;
   }
 
   async getTemplates() {
@@ -82,19 +94,25 @@ export class HomeAssistantWidget extends SunPanelWidgetElement {
           <span class="label"></span>
           <span class="value"><strong>Home Assistant</strong></span>
         </div>
-        ${this.content.split("\n").map(item => {
-
+    ${this.content.split("\n").map(item => {
       var progress = this.extractProgress(item)
+      var kv = this.extractKeyValue(item)
       if (progress != -1) {
         return html`
-        <div class="progress-bar">
-          <div class="progress-bar-line" style="max-width: ${progress * 100}%"></div>
-        </div>`
+            <div class="progress-bar">
+              <div class="progress-bar-line" style="max-width: ${progress * 100}%"></div>
+            </div>`
+      } else if (kv) {
+        return html`
+            <div class="info-item">
+              <span class="label">${kv.key}</span>
+              <span class="value">${kv.value}</span>
+            </div>`
       } else {
         return html`
-        <div class="info-item">
-          <span class="value">${item}</span>
-        </div>`
+            <div class="info-item">
+              <span class="value">${item}</span>
+            </div>`
       }
     })}
       </div>
