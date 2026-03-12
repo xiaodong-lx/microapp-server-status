@@ -6,14 +6,12 @@ const INTERVAL_MAX = 10
 const INTERVAL_MIN = 0
 const INTERVAL_DEFAULT = 3
 
-export class PVEStatusPage extends SunPanelPageElement {
+export class OnePanelDockerContainerStatusPage extends SunPanelPageElement {
   static properties = {
     widgetInfo: { type: Object },
     host: { type: String },
     token: { type: String },
-    node: { type: String },
-    qemuid: { type: Number },
-    lxcid: { type: Number },
+    containers: { type: String },
     interval: { type: Number }
   };
 
@@ -22,9 +20,7 @@ export class PVEStatusPage extends SunPanelPageElement {
     const config = widgetInfo?.config || {};
     this.host = config.host ?? '';
     this.token = config.token ?? '';
-    this.node = config.node ?? '';
-    this.qemuid = config.qemuid ?? 0;
-    this.lxcid = config.lxcid ?? 0;
+    this.containers = config.containers ?? '';
     this.interval = Math.min(Math.max(parseInt(config.interval ?? INTERVAL_DEFAULT), INTERVAL_MIN), INTERVAL_MAX);
     this.requestUpdate();
   }
@@ -50,9 +46,7 @@ export class PVEStatusPage extends SunPanelPageElement {
         ...this.widgetInfo.config,
         host: this.host,
         token: this.token,
-        node: this.node,
-        qemuid: this.qemuid,
-        lxcid: this.lxcid,
+        containers: this.containers,
         interval: Math.min(Math.max(parseInt(this.interval ?? INTERVAL_DEFAULT), INTERVAL_MIN), INTERVAL_MAX)
       },
     });
@@ -68,7 +62,7 @@ export class PVEStatusPage extends SunPanelPageElement {
           <h1>设置</h1>
           <form @submit="${(e) => e.preventDefault()}">
             <div class="form-section">
-              <div class="section-title">Proxmox VE Server</div>
+              <div class="section-title">1Panel Docker Contaienrs</div>
               <div class="form-group">
                 <label for="host">Host</label>
                 <input
@@ -92,13 +86,13 @@ export class PVEStatusPage extends SunPanelPageElement {
                 >
                 </div>
               <div class="form-group">
-                <label for="node">Node</label>
+                <label for="containers">Containers</label>
                 <input
                   type="text"
-                  name="node"
-                  .value="${this.node}"
-                  @input="${(e) => this.node = e.target.value}"
-                  placeholder="Node"
+                  name="containers"
+                  .value="${this.containers}"
+                  @input="${(e) => this.containers = e.target.value}"
+                  placeholder="container1, container2"
                   class="styled-input"
                 >
                 </div>
@@ -112,28 +106,6 @@ export class PVEStatusPage extends SunPanelPageElement {
                   .value="${this.interval}"
                   @input="${(e) => this.interval = e.target.value}"
                   placeholder="Interval"
-                  class="styled-input"
-                >
-                </div>
-              <div class="form-group">
-                <label for="qemuid">虚拟机 ID</label>
-                <input
-                  type="number"
-                  name="qemuid"
-                  .value="${this.qemuid}"
-                  @input="${(e) => this.qemuid = e.target.value}"
-                  placeholder="100 - 999999999，或留空"
-                  class="styled-input"
-                >
-                </div>
-              <div class="form-group">
-                <label for="lxcid">LXC ID</label>
-                <input
-                  type="number"
-                  name="lxcid"
-                  .value="${this.lxcid}"
-                  @input="${(e) => this.lxcid = e.target.value}"
-                  placeholder="100 - 999999999，或留空"
                   class="styled-input"
                 >
                 </div>

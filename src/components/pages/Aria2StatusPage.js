@@ -6,7 +6,7 @@ const INTERVAL_MAX = 10
 const INTERVAL_MIN = 3
 const INTERVAL_DEFAULT = 3
 
-export class Aria2StatusWidgetPage extends SunPanelPageElement {
+export class Aria2StatusPage extends SunPanelPageElement {
   static properties = {
     widgetInfo: { type: Object },
     url: { type: String },

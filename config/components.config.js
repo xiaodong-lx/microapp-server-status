@@ -1,11 +1,14 @@
 import { PVEStatusWidget } from '../src/components/widgets/PVEStatusWidget.js';
-import { PVEStatusWidgetPage as PVEStatusPage } from '../src/components/pages/PVEStatusPage.js';
+import { PVEStatusPage as PVEStatusPage } from '../src/components/pages/PVEStatusPage.js';
 
 import { Aria2StatusWidget } from '../src/components/widgets/Aria2StatusWidget.js';
-import { Aria2StatusWidgetPage as Aria2StatusPage } from '../src/components/pages/Aria2StatusPage.js';
+import { Aria2StatusPage as Aria2StatusPage } from '../src/components/pages/Aria2StatusPage.js';
 
 import { HomeAssistantWidget } from '../src/components/widgets/HomeAssistantWidget.js';
 import { HomeAssistantPage } from '../src/components/pages/HomeAssistantPage.js';
+
+import { OnePanelDockerContainerStatusWidget } from '../src/components/widgets/1PanelDockerContainerStatusWidget.js';
+import { OnePanelDockerContainerStatusPage } from '../src/components/pages/1PanelDockerContainerStatusPage.js';
 
 export default {
   // =======================
@@ -20,6 +23,9 @@ export default {
     },
     'home-assistant-config': {
       component: HomeAssistantPage,
+    },
+    '1panel-docker-container-config': {
+      component: OnePanelDockerContainerStatusPage,
     },
   },
 
@@ -37,6 +43,11 @@ export default {
     'home-assistant-widget': {
       component: HomeAssistantWidget,
       configComponentName: 'home-assistant-config',
+      size: ['2x2'],
+    },
+    '1panel-docker-container-widget': {
+      component: OnePanelDockerContainerStatusWidget,
+      configComponentName: '1panel-docker-container-config',
       size: ['2x2'],
     },
   },
