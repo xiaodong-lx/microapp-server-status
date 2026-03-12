@@ -73,6 +73,7 @@ export const style_page = css`
     color: #595959;
   }
   
+  textarea.styled-input,
   input.styled-input {
     width: 100%;
     padding: 8px 12px;
@@ -85,6 +86,7 @@ export const style_page = css`
     transition: all 0.2s ease;
   }
   
+  textarea.styled-input:focus,
   input.styled-input:focus {
     outline: none;
     border-color: #1890ff;
