@@ -1,6 +1,7 @@
 
-import { SunPanelWidgetElement, VERSION } from '@sun-panel/micro-app';
-import { html, css } from 'lit';
+import { SunPanelWidgetElement } from '@sun-panel/micro-app';
+import { html } from 'lit';
+import { style_widget } from '../../utils/style';
 
 export class PVEStatusWidget extends SunPanelWidgetElement {
   static properties = {
@@ -166,44 +167,5 @@ export class PVEStatusWidget extends SunPanelWidgetElement {
     `;
   }
 
-  static styles = css`
-    .container {
-      padding: 8px 12px;
-      height: 100%;
-      box-sizing: border-box;
-      position: relative;
-      overflow: hidden;
-      background: white;
-    }
-    
-    .info-item {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 4px;
-    }
-    
-    .label {
-      color: #666;
-      font-size: 12px;
-    }
-    
-    .value {
-      color: #333;
-      font-size: 12px;
-      font-weight: 500;
-    }
-    
-    .progress-bar {
-      background-color: rgba(207, 207, 207, 0.66);
-      height: 5px;
-      border-radius: 2.5px;
-    }
-    
-    .progress-bar-line {
-      background-color: rgba(145, 145, 145, 1);
-      height: 5px;
-      line-height: 5px;
-      border-radius: 2.5px;
-    }
-  `;
+  static styles = style_widget;
 }
