@@ -1,7 +1,8 @@
 
 import { SunPanelWidgetElement } from '@sun-panel/micro-app';
 import { html } from 'lit';
-import { style_widget } from '../../utils/style';
+import { style_widget, renderNotReady } from '../../utils/style';
+import { INTERVAL_MIN } from '../../utils/const';
 
 export class PVEStatusWidget extends SunPanelWidgetElement {
   static properties = {
@@ -15,6 +16,9 @@ export class PVEStatusWidget extends SunPanelWidgetElement {
     uptime: { type: String },
     status: { type: String },
   };
+
+  _title = "Proxmox VE";
+  _ready = false;
 
   constructor() {
     super();
@@ -31,7 +35,7 @@ export class PVEStatusWidget extends SunPanelWidgetElement {
     this.getServerStatus()
     var interval = this.spCtx.widgetInfo.config.interval;
 
-    if (interval > 1) {
+    if (interval >= INTERVAL_MIN) {
       setInterval(() => {
         this.getServerStatus();
       }, interval * 1000);
@@ -64,6 +68,8 @@ export class PVEStatusWidget extends SunPanelWidgetElement {
   }
 
   async getServerStatus() {
+    this._ready = false;
+
     try {
       const host = this.spCtx.widgetInfo.config.host;
       const token = this.spCtx.widgetInfo.config.token;
@@ -112,6 +118,8 @@ export class PVEStatusWidget extends SunPanelWidgetElement {
         this.status = data.status;
       }
 
+      this._ready = true;
+
     } catch (error) {
       switch (error.type) {
         case 'microApp':
@@ -125,11 +133,15 @@ export class PVEStatusWidget extends SunPanelWidgetElement {
   }
 
   render() {
+    if (!this._ready) {
+      return renderNotReady(this._title)
+    }
+
     return html`
       <div class="container">
         <div class="info-item">
           <span class="label"></span>
-          <span class="value"><strong>Proxmox VE</strong></span>
+          <span class="value"><strong>${this._title}</strong></span>
         </div>
         <div class="info-item">
           <span class="label">Name</span>

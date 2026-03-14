@@ -1,10 +1,7 @@
 import { SunPanelPageElement } from '@sun-panel/micro-app';
 import { html } from 'lit';
 import { style_page } from '../../utils/style';
-
-const INTERVAL_MAX = 10
-const INTERVAL_MIN = 0
-const INTERVAL_DEFAULT = 3
+import { INTERVAL_DEFAULT, INTERVAL_MAX, INTERVAL_MIN } from '../../utils/const';
 
 export class OnePanelDockerContainerStatusPage extends SunPanelPageElement {
   static properties = {
@@ -97,7 +94,7 @@ export class OnePanelDockerContainerStatusPage extends SunPanelPageElement {
                 >
                 </div>
               <div class="form-group">
-                <label for="interval">刷新间隔（${INTERVAL_MIN}-${INTERVAL_MAX}，0为不刷新）</label>
+                <label for="interval">刷新间隔（${INTERVAL_MIN}-${INTERVAL_MAX}）</label>
                 <input
                   type="number"
                   name="interval"

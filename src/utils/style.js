@@ -1,4 +1,4 @@
-import { css } from 'lit';
+import { css, html } from 'lit';
 
 export const style_page = css`
   :host { height: 100%; width: 100%; display: block; }
@@ -168,3 +168,18 @@ export const style_widget = css`
     border-radius: 2.5px;
   }
 `;
+
+export function renderNotReady(title) {
+  return html`
+  <div class="container">
+    <div class="info-item">
+      <span class="label"></span>
+      <span class="value"><strong>${title}</strong></span>
+    </div>
+    <div class="info-item">
+      <span class="label"></span>
+      <span class="value">组件未设置或异常</span>
+    </div>
+  </div>
+`;
+}

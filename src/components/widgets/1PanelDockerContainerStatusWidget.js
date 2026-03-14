@@ -1,23 +1,29 @@
 
 import { SunPanelWidgetElement } from '@sun-panel/micro-app';
 import { html } from 'lit';
-import { style_widget } from '../../utils/style';
+import { style_widget, renderNotReady } from '../../utils/style';
 import { md5 } from '../../utils/md5';
+import { INTERVAL_MIN } from '../../utils/const';
 
 export class OnePanelDockerContainerStatusWidget extends SunPanelWidgetElement {
   static properties = {
     state: { type: Array },
   };
 
+  _title = "1Panel Container";
+  _ready = false;
+
   constructor() {
     super();
+    this._title = "1Panel Container";
+
     this.state = [];
   }
   onInitialized() {
     this.getContainers()
     var interval = this.spCtx.widgetInfo.config.interval;
 
-    if (interval > 1) {
+    if (interval >= INTERVAL_MIN) {
       setInterval(() => {
         this.getContainers();
       }, interval * 1000);
@@ -40,10 +46,12 @@ export class OnePanelDockerContainerStatusWidget extends SunPanelWidgetElement {
   }
 
   async getContainers() {
+    this._ready = false;
+
     try {
       const host = this.spCtx.widgetInfo.config.host;
       const token = this.spCtx.widgetInfo.config.token;
-      const containers = this.spCtx.widgetInfo.config.containers.split(",").map(x => x.trim());
+      const containers = this.spCtx.widgetInfo.config.containers?.split(",").map(x => x.trim());
 
       if (!host || !token || !containers) { return }
 
@@ -56,9 +64,15 @@ export class OnePanelDockerContainerStatusWidget extends SunPanelWidgetElement {
       });
 
       var data = response.data?.data;
+      this._ready = true;
       var list = data
         .filter(x => containers.indexOf(x.name) != -1)
         .sort((a, b) => containers.indexOf(a.name) - containers.indexOf(b.name))
+
+      if (list.length == 0) {
+        list = [{ name: "no container" }];
+      }
+
       this.state = list;
 
     } catch (error) {
@@ -74,11 +88,15 @@ export class OnePanelDockerContainerStatusWidget extends SunPanelWidgetElement {
   }
 
   render() {
+    if (!this._ready) {
+      return renderNotReady(this._title)
+    }
+
     return html`
       <div class="container">
         <div class="info-item">
           <span class="label"></span>
-          <span class="value"><strong>1Panel Container</strong></span>
+          <span class="value"><strong>${this._title}</strong></span>
         </div>
     ${this.state?.map(item => {
       return html`

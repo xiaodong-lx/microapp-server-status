@@ -1,10 +1,7 @@
 import { SunPanelPageElement } from '@sun-panel/micro-app';
 import { html } from 'lit';
 import { style_page } from '../../utils/style';
-
-const INTERVAL_MAX = 10
-const INTERVAL_MIN = 3
-const INTERVAL_DEFAULT = 3
+import { INTERVAL_DEFAULT, INTERVAL_MAX, INTERVAL_MIN } from '../../utils/const';
 
 export class Aria2StatusPage extends SunPanelPageElement {
   static properties = {

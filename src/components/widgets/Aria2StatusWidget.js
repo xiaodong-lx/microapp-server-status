@@ -1,7 +1,8 @@
 
 import { SunPanelWidgetElement } from '@sun-panel/micro-app';
 import { html } from 'lit';
-import { style_widget } from '../../utils/style';
+import { style_widget, renderNotReady } from '../../utils/style';
+import { INTERVAL_MIN } from '../../utils/const';
 
 export class Aria2StatusWidget extends SunPanelWidgetElement {
   static properties = {
@@ -11,6 +12,9 @@ export class Aria2StatusWidget extends SunPanelWidgetElement {
     downloadSpeed: { type: String },
     uploadSpeed: { type: String },
   };
+
+  _title = "Aria2";
+  _ready = false;
 
   constructor() {
     super();
@@ -24,7 +28,7 @@ export class Aria2StatusWidget extends SunPanelWidgetElement {
     this.getServerStatus()
     var interval = this.spCtx.widgetInfo.config.interval;
 
-    if (interval > 1) {
+    if (interval >= INTERVAL_MIN) {
       setInterval(() => {
         this.getServerStatus();
       }, interval * 1000);
@@ -49,6 +53,8 @@ export class Aria2StatusWidget extends SunPanelWidgetElement {
   }
 
   async getServerStatus() {
+    this._ready = false;
+
     try {
       const url = this.spCtx.widgetInfo.config.url;
       const token = this.spCtx.widgetInfo.config.token;
@@ -74,11 +80,13 @@ export class Aria2StatusWidget extends SunPanelWidgetElement {
 
       var data = response.data;
 
+      this._ready = true;
       this.numActive = data.result.numActive;
       this.numStopped = data.result.numStopped;
       this.numWaiting = data.result.numWaiting;
       this.uploadSpeed = this.formatBytes(parseInt(data.result.uploadSpeed));
       this.downloadSpeed = this.formatBytes(parseInt(data.result.downloadSpeed));
+
     } catch (error) {
       switch (error.type) {
         case 'microApp':
@@ -92,11 +100,15 @@ export class Aria2StatusWidget extends SunPanelWidgetElement {
   }
 
   render() {
+    if (!this._ready) {
+      return renderNotReady(this._title)
+    }
+
     return html`
       <div class="container">
         <div class="info-item">
           <span class="label"></span>
-          <span class="value"><strong>Aria2</strong></span>
+          <span class="value"><strong>${this._title}</strong></span>
         </div>
         <div class="info-item">
           <span class="label">Active</span>

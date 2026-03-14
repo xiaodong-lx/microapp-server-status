@@ -1,24 +1,28 @@
 
 import { SunPanelWidgetElement } from '@sun-panel/micro-app';
 import { html } from 'lit';
-import { style_widget } from '../../utils/style';
+import { style_widget, renderNotReady } from '../../utils/style';
+import { INTERVAL_MIN } from '../../utils/const';
 
 export class HomeAssistantWidget extends SunPanelWidgetElement {
   static properties = {
     content: { type: String },
   };
 
+  _title = "Home Assistant";
+  _ready = false;
+
   constructor() {
     super();
     this.content = '';
   }
   onInitialized() {
-    this.getTemplates()
+    this.getTemplate()
     var interval = this.spCtx.widgetInfo.config.interval;
 
-    if (interval > 1) {
+    if (interval >= INTERVAL_MIN) {
       setInterval(() => {
-        this.getTemplates();
+        this.getTemplate();
       }, interval * 1000);
     }
   }
@@ -49,7 +53,9 @@ export class HomeAssistantWidget extends SunPanelWidgetElement {
     return null;
   }
 
-  async getTemplates() {
+  async getTemplate() {
+    this._ready = false;
+
     try {
       const host = this.spCtx.widgetInfo.config.host;
       const token = this.spCtx.widgetInfo.config.token;
@@ -74,6 +80,8 @@ export class HomeAssistantWidget extends SunPanelWidgetElement {
       });
 
       var data = response.data;
+
+      this._ready = true;
       this.content = data;
 
     } catch (error) {
@@ -89,11 +97,15 @@ export class HomeAssistantWidget extends SunPanelWidgetElement {
   }
 
   render() {
+    if (!this._ready) {
+      return renderNotReady(this._title)
+    }
+
     return html`
       <div class="container">
         <div class="info-item">
           <span class="label"></span>
-          <span class="value"><strong>Home Assistant</strong></span>
+          <span class="value"><strong>${this._title}</strong></span>
         </div>
     ${this.content.split("\n").map(item => {
       var progress = this.extractProgress(item)
