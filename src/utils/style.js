@@ -170,6 +170,10 @@ export const style_widget = css`
 `;
 
 export function renderNotReady(title) {
+  return render(title, "组件未设置或异常");
+}
+
+export function render(title, text) {
   return html`
   <div class="container">
     <div class="info-item">
@@ -178,7 +182,7 @@ export function renderNotReady(title) {
     </div>
     <div class="info-item">
       <span class="label"></span>
-      <span class="value">组件未设置或异常</span>
+      <span class="value">${text}</span>
     </div>
   </div>
 `;

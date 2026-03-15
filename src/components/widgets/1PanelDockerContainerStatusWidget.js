@@ -11,7 +11,7 @@ export class OnePanelDockerContainerStatusWidget extends SunPanelWidgetElement {
   };
 
   _title = "1Panel Container";
-  _ready = false;
+  _ready = -1;
 
   constructor() {
     super();
@@ -19,6 +19,7 @@ export class OnePanelDockerContainerStatusWidget extends SunPanelWidgetElement {
 
     this.state = [];
   }
+  
   onInitialized() {
     this.getContainers()
     var interval = this.spCtx.widgetInfo.config.interval;
@@ -46,14 +47,14 @@ export class OnePanelDockerContainerStatusWidget extends SunPanelWidgetElement {
   }
 
   async getContainers() {
-    this._ready = false;
+    this._ready = 0;
 
     try {
       const host = this.spCtx.widgetInfo.config.host;
       const token = this.spCtx.widgetInfo.config.token;
       const containers = this.spCtx.widgetInfo.config.containers?.split(",").map(x => x.trim());
 
-      if (!host || !token || !containers) { return }
+      if (!host || !token || !containers) { this._ready = -1; return }
 
       const response = await this.spCtx.api.network.request({
         request: {
@@ -64,7 +65,6 @@ export class OnePanelDockerContainerStatusWidget extends SunPanelWidgetElement {
       });
 
       var data = response.data?.data;
-      this._ready = true;
       var list = data
         .filter(x => containers.indexOf(x.name) != -1)
         .sort((a, b) => containers.indexOf(a.name) - containers.indexOf(b.name))
@@ -73,8 +73,9 @@ export class OnePanelDockerContainerStatusWidget extends SunPanelWidgetElement {
         list = [{ name: "no container" }];
       }
 
-      this.state = list;
+      this._ready = 1;
 
+      this.state = list;
     } catch (error) {
       switch (error.type) {
         case 'microApp':
@@ -88,7 +89,7 @@ export class OnePanelDockerContainerStatusWidget extends SunPanelWidgetElement {
   }
 
   render() {
-    if (!this._ready) {
+    if (this._ready == -1) {
       return renderNotReady(this._title)
     }
 
@@ -98,13 +99,13 @@ export class OnePanelDockerContainerStatusWidget extends SunPanelWidgetElement {
           <span class="label"></span>
           <span class="value"><strong>${this._title}</strong></span>
         </div>
-    ${this.state?.map(item => {
+      ${this.state?.map(item => {
       return html`
-          <div class="info-item">
-            <span class="label">${item.name}</span>
-            <span class="value">${item.state}</span>
-          </div>`
-    })}
+        <div class="info-item">
+          <span class="label">${item.name}</span>
+          <span class="value">${item.state}</span>
+        </div>`
+      })}
       </div>
     `;
   }

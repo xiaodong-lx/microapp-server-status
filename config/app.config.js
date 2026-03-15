@@ -1,7 +1,7 @@
 export default {
   author: 'xiaodong',
   microAppId: 'xiaodong-server-status',
-  version: '1.0.0',
+  version: '1.0.1',
   entry: 'main.js',
   icon: 'logo.png',
   debug: false,
@@ -25,5 +25,9 @@ export default {
     "*"
   ],
   dataNodes: {
+    widgetConfig: {
+      scope: 'user',
+      isPublic: false
+    }
   }
 };

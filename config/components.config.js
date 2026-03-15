@@ -43,7 +43,7 @@ export default {
     'home-assistant-widget': {
       component: HomeAssistantWidget,
       configComponentName: 'home-assistant-config',
-      size: ['2x2'],
+      size: ["2x2", "2x4", "1x2"],
     },
     '1panel-docker-container-widget': {
       component: OnePanelDockerContainerStatusWidget,

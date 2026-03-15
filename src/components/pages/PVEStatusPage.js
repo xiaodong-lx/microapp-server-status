@@ -7,7 +7,6 @@ export class PVEStatusPage extends SunPanelPageElement {
   static properties = {
     widgetInfo: { type: Object },
     host: { type: String },
-    token: { type: String },
     node: { type: String },
     qemuid: { type: Number },
     lxcid: { type: Number },
@@ -18,7 +17,7 @@ export class PVEStatusPage extends SunPanelPageElement {
     this.widgetInfo = widgetInfo;
     const config = widgetInfo?.config || {};
     this.host = config.host ?? '';
-    this.token = config.token ?? '';
+    this.token = '';
     this.node = config.node ?? '';
     this.qemuid = config.qemuid ?? 0;
     this.lxcid = config.lxcid ?? 0;
@@ -26,33 +25,22 @@ export class PVEStatusPage extends SunPanelPageElement {
     this.requestUpdate();
   }
 
-  async loadConfig() {
-    try {
-      const savedConfig = await this.spCtx.api.dataNode.user.get('cardConfig');
-      if (savedConfig) {
-        this.config = { ...this.config, ...savedConfig };
-      }
-      this.requestUpdate();
-    } catch (error) {
-      console.error('[CardConfig] Failed to load config:', error);
-    }
-  }
-
   async handleSaveOrCreateWidget() {
-    this.token = this.token ?? this.widgetInfo.config.token
-
-    this.spCtx.api.widget.save({
+    const resp = await this.spCtx.api.widget.save({
       ...this.widgetInfo,
       config: {
         ...this.widgetInfo.config,
         host: this.host,
-        token: this.token,
         node: this.node,
         qemuid: this.qemuid,
         lxcid: this.lxcid,
         interval: Math.min(Math.max(parseInt(this.interval ?? INTERVAL_DEFAULT), INTERVAL_MIN), INTERVAL_MAX)
       },
-    });
+    })
+
+    if (this.token && resp.id) {
+      this.spCtx.api.dataNode.user.setByKey("widgetConfig", resp.id + "_token", this.token);
+    }
   }
 
   render() {

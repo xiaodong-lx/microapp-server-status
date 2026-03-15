@@ -7,7 +7,6 @@ export class Aria2StatusPage extends SunPanelPageElement {
   static properties = {
     widgetInfo: { type: Object },
     url: { type: String },
-    token: { type: String },
     interval: { type: Number }
   };
 
@@ -15,35 +14,24 @@ export class Aria2StatusPage extends SunPanelPageElement {
     this.widgetInfo = widgetInfo;
     const config = widgetInfo?.config || {};
     this.url = config.url ?? '';
-    this.token = config.token ?? '';
+    this.token = '';
     this.interval = Math.min(Math.max(parseInt(config.interval ?? INTERVAL_DEFAULT), INTERVAL_MIN), INTERVAL_MAX);
     this.requestUpdate();
   }
 
-  async loadConfig() {
-    try {
-      const savedConfig = await this.spCtx.api.dataNode.user.get('cardConfig');
-      if (savedConfig) {
-        this.config = { ...this.config, ...savedConfig };
-      }
-      this.requestUpdate();
-    } catch (error) {
-      console.error('[CardConfig] Failed to load config:', error);
-    }
-  }
-
   async handleSaveOrCreateWidget() {
-    this.token = this.token ?? this.widgetInfo.config.token
-
-    this.spCtx.api.widget.save({
+    const resp = await this.spCtx.api.widget.save({
       ...this.widgetInfo,
       config: {
         ...this.widgetInfo.config,
         url: this.url,
-        token: this.token,
         interval: Math.min(Math.max(parseInt(this.interval ?? INTERVAL_DEFAULT), INTERVAL_MIN), INTERVAL_MAX)
       },
-    });
+    })
+
+    if (this.token && resp.id) {
+      this.spCtx.api.dataNode.user.setByKey("widgetConfig", resp.id + "_token", this.token);
+    }
   }
 
   render() {

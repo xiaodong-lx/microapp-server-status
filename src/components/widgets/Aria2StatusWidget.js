@@ -3,6 +3,7 @@ import { SunPanelWidgetElement } from '@sun-panel/micro-app';
 import { html } from 'lit';
 import { style_widget, renderNotReady } from '../../utils/style';
 import { INTERVAL_MIN } from '../../utils/const';
+import { formatBytes } from '../../utils/function';
 
 export class Aria2StatusWidget extends SunPanelWidgetElement {
   static properties = {
@@ -14,7 +15,7 @@ export class Aria2StatusWidget extends SunPanelWidgetElement {
   };
 
   _title = "Aria2";
-  _ready = false;
+  _ready = -1;
 
   constructor() {
     super();
@@ -24,6 +25,7 @@ export class Aria2StatusWidget extends SunPanelWidgetElement {
     this.downloadSpeed = '-';
     this.uploadSpeed = '-';
   }
+
   onInitialized() {
     this.getServerStatus()
     var interval = this.spCtx.widgetInfo.config.interval;
@@ -35,38 +37,30 @@ export class Aria2StatusWidget extends SunPanelWidgetElement {
     }
   }
 
+  onDisconnected() {
+    if (this.spCtx.widgetInfo.widgetId) {
+      this.spCtx.api.dataNode.user.delByKey("widgetConfig", this.spCtx.widgetInfo.widgetId + "_token");
+    }
+  }
+
   onWidgetInfoChanged(newWidgetInfo, oldWidgetInfo) {
     this.requestUpdate();
   }
 
-  formatBytes(bytes, decimals = 2) {
-    if (bytes === 0) return '0 B';
-    if (!bytes || isNaN(bytes)) return '0 B';
-
-    const k = 1024;
-    const dm = decimals < 0 ? 0 : decimals;
-    const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
-  }
-
   async getServerStatus() {
-    this._ready = false;
+    this._ready = 0;
 
     try {
       const url = this.spCtx.widgetInfo.config.url;
-      const token = this.spCtx.widgetInfo.config.token;
 
-      if (!url || !token) { return }
+      if (!url) { this._ready = -1; return }
 
       var body = {
         "jsonrpc": "2.0",
         "method": "aria2.getGlobalStat",
         "id": "QXJpYU5nXzE3Mjg4MjkwNTFfMC43MjA1ODQzNjc2NDU4NTA4",
         "params": [
-          "token:" + token
+          "token:{{token}}"
         ]
       }
 
@@ -75,18 +69,25 @@ export class Aria2StatusWidget extends SunPanelWidgetElement {
           targetUrl: url,
           method: 'POST',
           body: JSON.stringify(body)
-        }
+        },
+        templateReplacements: [
+          {
+            placeholder: '{{token}}',
+            fields: ['body'],
+            dataNodeKey: "widgetConfig." + this.spCtx.widgetInfo.widgetId + "_token"
+          }
+        ]
       });
 
       var data = response.data;
 
-      this._ready = true;
+      this._ready = 1;
+
       this.numActive = data.result.numActive;
       this.numStopped = data.result.numStopped;
       this.numWaiting = data.result.numWaiting;
-      this.uploadSpeed = this.formatBytes(parseInt(data.result.uploadSpeed));
-      this.downloadSpeed = this.formatBytes(parseInt(data.result.downloadSpeed));
-
+      this.uploadSpeed = formatBytes(parseInt(data.result.uploadSpeed));
+      this.downloadSpeed = formatBytes(parseInt(data.result.downloadSpeed));
     } catch (error) {
       switch (error.type) {
         case 'microApp':
@@ -100,7 +101,7 @@ export class Aria2StatusWidget extends SunPanelWidgetElement {
   }
 
   render() {
-    if (!this._ready) {
+    if (this._ready == -1) {
       return renderNotReady(this._title)
     }
 

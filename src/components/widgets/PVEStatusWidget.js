@@ -3,6 +3,7 @@ import { SunPanelWidgetElement } from '@sun-panel/micro-app';
 import { html } from 'lit';
 import { style_widget, renderNotReady } from '../../utils/style';
 import { INTERVAL_MIN } from '../../utils/const';
+import { formatBytes, formatUptime } from '../../utils/function';
 
 export class PVEStatusWidget extends SunPanelWidgetElement {
   static properties = {
@@ -18,7 +19,7 @@ export class PVEStatusWidget extends SunPanelWidgetElement {
   };
 
   _title = "Proxmox VE";
-  _ready = false;
+  _ready = -1;
 
   constructor() {
     super();
@@ -31,6 +32,7 @@ export class PVEStatusWidget extends SunPanelWidgetElement {
     this.uptime = '-';
     this.status = '-';
   }
+  
   onInitialized() {
     this.getServerStatus()
     var interval = this.spCtx.widgetInfo.config.interval;
@@ -42,42 +44,26 @@ export class PVEStatusWidget extends SunPanelWidgetElement {
     }
   }
 
+  onDisconnected() {
+    if (this.spCtx.widgetInfo.widgetId) {
+      this.spCtx.api.dataNode.user.delByKey("widgetConfig", this.spCtx.widgetInfo.widgetId + "_token");
+    }
+  }
+
   onWidgetInfoChanged(newWidgetInfo, oldWidgetInfo) {
     this.requestUpdate();
   }
 
-  formatBytes(bytes, decimals = 2) {
-    if (bytes === 0) return '0 B';
-    if (!bytes || isNaN(bytes)) return '0 B';
-
-    const k = 1024;
-    const dm = decimals < 0 ? 0 : decimals;
-    const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
-  }
-
-  formatUptime(seconds) {
-    const days = Math.floor(seconds / 86400);
-    const hours = Math.floor(seconds / 3600) % 24;
-    const minutes = Math.floor(seconds / 60) % 60;
-
-    return `${days}d ${hours}h ${minutes}m`;
-  }
-
   async getServerStatus() {
-    this._ready = false;
+    this._ready = 0;
 
     try {
       const host = this.spCtx.widgetInfo.config.host;
-      const token = this.spCtx.widgetInfo.config.token;
       const node = this.spCtx.widgetInfo.config.node;
       const qemuid = this.spCtx.widgetInfo.config.qemuid;
       const lxcid = this.spCtx.widgetInfo.config.lxcid;
 
-      if (!host || !token || !node) { return }
+      if (!host || !node) { this._ready = -1; return }
 
       var targetUrl = `${host}/api2/json/nodes/${node}/status`;
       this.type = "node";
@@ -94,32 +80,39 @@ export class PVEStatusWidget extends SunPanelWidgetElement {
           targetUrl: targetUrl,
           method: 'GET',
           headers: {
-            "Authorization": `PVEAPIToken ${token}`
+            "Authorization": "PVEAPIToken {{token}}"
           }
-        }
+        },
+        templateReplacements: [
+          {
+            placeholder: '{{token}}',
+            fields: ['headers'],
+            dataNodeKey: "widgetConfig." + this.spCtx.widgetInfo.widgetId + "_token"
+          }
+        ]
       });
 
       var data = response.data?.data;
+
+      this._ready = 1;
+
       if (this.type == "node") {
         this.name = node;
         this.loadavg = data.loadavg.join(", ");
         this.cpu = Math.round(data.cpu * 100, 0) + "%";
         this.cpu_percent = Math.round(data.cpu * 100, 0);
-        this.mem = `${this.formatBytes(data.memory.used, 1)}/${this.formatBytes(data.memory.total, 1)}`;
+        this.mem = `${formatBytes(data.memory.used, 1)}/${formatBytes(data.memory.total, 1)}`;
         this.mem_percent = parseFloat(data.memory.used) / parseFloat(data.memory.total) * 100;
-        this.uptime = this.formatUptime(data.uptime);
+        this.uptime = formatUptime(data.uptime);
       } else if (this.type == "qemu" || this.type == "lxc") {
         this.name = `${data.name} (${data.vmid})`;
         this.cpu = Math.round(data.cpu * 100, 0) + "%";
         this.cpu_percent = Math.round(data.cpu * 100, 0);
-        this.mem = `${this.formatBytes(data.mem, 1)}/${this.formatBytes(data.maxmem, 1)}`;
+        this.mem = `${formatBytes(data.mem, 1)}/${formatBytes(data.maxmem, 1)}`;
         this.mem_percent = parseFloat(data.mem) / parseFloat(data.maxmem) * 100;
-        this.uptime = this.formatUptime(data.uptime);
+        this.uptime = formatUptime(data.uptime);
         this.status = data.status;
       }
-
-      this._ready = true;
-
     } catch (error) {
       switch (error.type) {
         case 'microApp':
@@ -133,7 +126,7 @@ export class PVEStatusWidget extends SunPanelWidgetElement {
   }
 
   render() {
-    if (!this._ready) {
+    if (this._ready == -1) {
       return renderNotReady(this._title)
     }
 

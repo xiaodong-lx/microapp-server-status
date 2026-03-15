@@ -22,18 +22,6 @@ export class OnePanelDockerContainerStatusPage extends SunPanelPageElement {
     this.requestUpdate();
   }
 
-  async loadConfig() {
-    try {
-      const savedConfig = await this.spCtx.api.dataNode.user.get('cardConfig');
-      if (savedConfig) {
-        this.config = { ...this.config, ...savedConfig };
-      }
-      this.requestUpdate();
-    } catch (error) {
-      console.error('[CardConfig] Failed to load config:', error);
-    }
-  }
-
   async handleSaveOrCreateWidget() {
     this.token = this.token ?? this.widgetInfo.config.token
 

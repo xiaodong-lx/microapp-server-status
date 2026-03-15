@@ -18,7 +18,6 @@ export class HomeAssistantPage extends SunPanelPageElement {
   static properties = {
     widgetInfo: { type: Object },
     host: { type: String },
-    token: { type: String },
     template: { type: String },
     interval: { type: Number }
   };
@@ -27,38 +26,26 @@ export class HomeAssistantPage extends SunPanelPageElement {
     this.widgetInfo = widgetInfo;
     const config = widgetInfo?.config || {};
     this.host = config.host ?? '';
-    this.token = config.token ?? '';
+    this.token = '';
     this.template = config.template ?? TEMPLATE_DEFAULT;
-
     this.interval = Math.min(Math.max(parseInt(config.interval ?? INTERVAL_DEFAULT), INTERVAL_MIN), INTERVAL_MAX);
     this.requestUpdate();
   }
 
-  async loadConfig() {
-    try {
-      const savedConfig = await this.spCtx.api.dataNode.user.get('cardConfig');
-      if (savedConfig) {
-        this.config = { ...this.config, ...savedConfig };
-      }
-      this.requestUpdate();
-    } catch (error) {
-      console.error('[CardConfig] Failed to load config:', error);
-    }
-  }
-
   async handleSaveOrCreateWidget() {
-    this.token = this.token ?? this.widgetInfo.config.token
-
-    this.spCtx.api.widget.save({
+    const resp = await this.spCtx.api.widget.save({
       ...this.widgetInfo,
       config: {
         ...this.widgetInfo.config,
         host: this.host,
-        token: this.token,
         template: this.template,
         interval: Math.min(Math.max(parseInt(this.interval ?? INTERVAL_DEFAULT), INTERVAL_MIN), INTERVAL_MAX)
       },
     });
+
+    if (this.token && resp.id) {
+      this.spCtx.api.dataNode.user.setByKey("widgetConfig", resp.id + "_token", this.token);
+    }
   }
 
   render() {
@@ -71,7 +58,7 @@ export class HomeAssistantPage extends SunPanelPageElement {
           <h1>设置</h1>
           <form @submit="${(e) => e.preventDefault()}">
             <div class="form-section">
-              <div class="section-title">Home-Assistant</div>
+              <div class="section-title">Home Assistant</div>
               <div class="form-group">
                 <label for="host">Host</label>
                 <input
@@ -89,7 +76,7 @@ export class HomeAssistantPage extends SunPanelPageElement {
                   type="text"
                   name="token"
                   .value=""
-                  @input="${(e) => this.token = e.target.value ?? this.token}"
+                  @input="${(e) => this.token = e.target.value}"
                   placeholder="留空则不修改"
                   class="styled-input"
                 >

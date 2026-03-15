@@ -10,12 +10,13 @@ export class HomeAssistantWidget extends SunPanelWidgetElement {
   };
 
   _title = "Home Assistant";
-  _ready = false;
+  _ready = -1;
 
   constructor() {
     super();
     this.content = '';
   }
+
   onInitialized() {
     this.getTemplate()
     var interval = this.spCtx.widgetInfo.config.interval;
@@ -24,6 +25,12 @@ export class HomeAssistantWidget extends SunPanelWidgetElement {
       setInterval(() => {
         this.getTemplate();
       }, interval * 1000);
+    }
+  }
+
+  onDisconnected() {
+    if (this.spCtx.widgetInfo.widgetId) {
+      this.spCtx.api.dataNode.user.delByKey("widgetConfig", this.spCtx.widgetInfo.widgetId + "_token");
     }
   }
 
@@ -54,14 +61,13 @@ export class HomeAssistantWidget extends SunPanelWidgetElement {
   }
 
   async getTemplate() {
-    this._ready = false;
+    this._ready = 0;
 
     try {
       const host = this.spCtx.widgetInfo.config.host;
-      const token = this.spCtx.widgetInfo.config.token;
       const template = this.spCtx.widgetInfo.config.template;
 
-      if (!host || !token) { return }
+      if (!host || !template) { this._ready = -1; return }
 
       var body = {
         template: template
@@ -72,18 +78,25 @@ export class HomeAssistantWidget extends SunPanelWidgetElement {
           targetUrl: `${host}/api/template`,
           method: 'POST',
           headers: {
-            "Authorization": `Bearer ${token}`,
+            "Authorization": "Bearer {{token}}",
             'content-type': 'application/json'
           },
           body: JSON.stringify(body)
-        }
+        },
+        templateReplacements: [
+          {
+            placeholder: '{{token}}',
+            fields: ['headers'],
+            dataNodeKey: "widgetConfig." + this.spCtx.widgetInfo.widgetId + "_token"
+          }
+        ]
       });
 
       var data = response.data;
 
-      this._ready = true;
-      this.content = data;
+      this._ready = 1;
 
+      this.content = data;
     } catch (error) {
       switch (error.type) {
         case 'microApp':
@@ -97,7 +110,7 @@ export class HomeAssistantWidget extends SunPanelWidgetElement {
   }
 
   render() {
-    if (!this._ready) {
+    if (this._ready == -1) {
       return renderNotReady(this._title)
     }
 
@@ -112,20 +125,20 @@ export class HomeAssistantWidget extends SunPanelWidgetElement {
       var kv = this.extractKeyValue(item)
       if (progress != -1) {
         return html`
-            <div class="progress-bar">
-              <div class="progress-bar-line" style="max-width: ${progress * 100}%"></div>
-            </div>`
+          <div class="progress-bar">
+            <div class="progress-bar-line" style="max-width: ${progress * 100}%"></div>
+          </div>`
       } else if (kv) {
         return html`
-            <div class="info-item">
-              <span class="label">${kv.key}</span>
-              <span class="value">${kv.value}</span>
-            </div>`
+          <div class="info-item">
+            <span class="label">${kv.key}</span>
+            <span class="value">${kv.value}</span>
+          </div>`
       } else {
         return html`
-            <div class="info-item">
-              <span class="value">${item}</span>
-            </div>`
+          <div class="info-item">
+            <span class="value">${item}</span>
+          </div>`
       }
     })}
       </div>
