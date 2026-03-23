@@ -19,7 +19,7 @@ export class OnePanelDockerContainerStatusWidget extends SunPanelWidgetElement {
 
     this.state = [];
   }
-  
+
   onInitialized() {
     this.getContainers()
     var interval = this.spCtx.widgetInfo.config.interval;
@@ -90,14 +90,13 @@ export class OnePanelDockerContainerStatusWidget extends SunPanelWidgetElement {
 
   render() {
     if (this._ready == -1) {
-      return renderNotReady(this._title)
+      return renderNotReady(this._title, this.spCtx);
     }
 
     return html`
-      <div class="container">
-        <div class="info-item">
-          <span class="label"></span>
-          <span class="value"><strong>${this._title}</strong></span>
+      <div class="container" ?dark=${this.spCtx?.darkMode}>
+        <div class="title">
+          ${this._title}
         </div>
       ${this.state?.map(item => {
       return html`
@@ -105,7 +104,7 @@ export class OnePanelDockerContainerStatusWidget extends SunPanelWidgetElement {
           <span class="label">${item.name}</span>
           <span class="value">${item.state}</span>
         </div>`
-      })}
+    })}
       </div>
     `;
   }

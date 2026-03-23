@@ -135,7 +135,15 @@ export const style_widget = css`
     box-sizing: border-box;
     position: relative;
     overflow: hidden;
-    background: white;
+    background: #fff;
+  }
+
+  .title {
+    display: flex;
+    justify-content: end;
+    align-items: center;
+    font-weight: bold;
+    font-size: 12px;
   }
   
   .info-item {
@@ -143,42 +151,51 @@ export const style_widget = css`
     justify-content: space-between;
     margin-top: 4px;
   }
-  
+    
   .label {
-    color: #666;
     font-size: 12px;
   }
   
   .value {
-    color: #333;
     font-size: 12px;
     font-weight: 500;
   }
   
   .progress-bar {
-    background-color: rgba(207, 207, 207, 0.66);
     height: 5px;
     border-radius: 2.5px;
   }
   
   .progress-bar-line {
-    background-color: rgba(145, 145, 145, 1);
     height: 5px;
     line-height: 5px;
     border-radius: 2.5px;
   }
+    
+  .container { background: #fff; }  
+  .title { color: #333; }
+  .label { color: #666; }
+  .value { color: #333; }
+  .progress-bar { background-color: #eee; }
+  .progress-bar-line { background-color: #888; }
+
+  .container[dark] { background: #333; }
+  .container[dark] .title { color: #fff; }
+  .container[dark] .value { color: #eee; }
+  .container[dark] .label { color: #aaa; }
+  .container[dark] .progress-bar { background-color: #888; }
+  .container[dark] .progress-bar-line { background-color: #eee; }
 `;
 
-export function renderNotReady(title) {
-  return render(title, "组件未设置或异常");
+export function renderNotReady(title, ctx) {
+  return render(title, "组件未设置或异常", ctx);
 }
 
-export function render(title, text) {
+export function render(title, text, ctx) {
   return html`
-  <div class="container">
-    <div class="info-item">
-      <span class="label"></span>
-      <span class="value"><strong>${title}</strong></span>
+  <div class="container" ?dark=${ctx?.darkMode}>
+    <div class="title">
+      ${title}
     </div>
     <div class="info-item">
       <span class="label"></span>

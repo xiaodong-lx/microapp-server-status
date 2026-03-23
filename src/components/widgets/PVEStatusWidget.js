@@ -32,7 +32,7 @@ export class PVEStatusWidget extends SunPanelWidgetElement {
     this.uptime = '-';
     this.status = '-';
   }
-  
+
   onInitialized() {
     this.getServerStatus()
     var interval = this.spCtx.widgetInfo.config.interval;
@@ -45,8 +45,8 @@ export class PVEStatusWidget extends SunPanelWidgetElement {
   }
 
   onDisconnected() {
-    if (this.spCtx.widgetInfo.widgetId) {
-      this.spCtx.api.dataNode.user.delByKey("widgetConfig", this.spCtx.widgetInfo.widgetId + "_token");
+    if (this.spCtx.widgetInfo.widgetId && this.spCtx.widgetInfo.widgetId !== "0") {
+      // this.spCtx.api.dataNode.user.delByKey("widgetConfig", this.spCtx.widgetInfo.widgetId + "_token");
     }
   }
 
@@ -127,14 +127,13 @@ export class PVEStatusWidget extends SunPanelWidgetElement {
 
   render() {
     if (this._ready == -1) {
-      return renderNotReady(this._title)
+      return renderNotReady(this._title, this.spCtx);
     }
 
     return html`
-      <div class="container">
-        <div class="info-item">
-          <span class="label"></span>
-          <span class="value"><strong>${this._title}</strong></span>
+      <div class="container" ?dark=${this.spCtx?.darkMode}>
+        <div class="title">
+          ${this._title}
         </div>
         <div class="info-item">
           <span class="label">Name</span>
