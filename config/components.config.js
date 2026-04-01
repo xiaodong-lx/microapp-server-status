@@ -1,8 +1,8 @@
 import { PVEStatusWidget } from '../src/components/widgets/PVEStatusWidget.js';
-import { PVEStatusPage as PVEStatusPage } from '../src/components/pages/PVEStatusPage.js';
+import { PVEStatusPage } from '../src/components/pages/PVEStatusPage.js';
 
 import { Aria2StatusWidget } from '../src/components/widgets/Aria2StatusWidget.js';
-import { Aria2StatusPage as Aria2StatusPage } from '../src/components/pages/Aria2StatusPage.js';
+import { Aria2StatusPage } from '../src/components/pages/Aria2StatusPage.js';
 
 import { HomeAssistantWidget } from '../src/components/widgets/HomeAssistantWidget.js';
 import { HomeAssistantPage } from '../src/components/pages/HomeAssistantPage.js';

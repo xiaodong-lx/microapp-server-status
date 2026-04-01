@@ -39,7 +39,7 @@ export class HomeAssistantWidget extends SunPanelWidgetElement {
   }
 
   extractProgress(str) {
-    const regex = /^PROGRESS\s+(0(\.\d+)?|1(\.0+)?)$/;
+    const regex = /^PROGRESS\s+(\d+(\.\d+)?|1(\.0+)?)$/;
     const match = str.match(regex);
 
     if (match) {
