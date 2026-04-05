@@ -135,7 +135,6 @@ export const style_widget = css`
     box-sizing: border-box;
     position: relative;
     overflow: hidden;
-    background: #fff;
   }
 
   .title {
@@ -170,6 +169,7 @@ export const style_widget = css`
     height: 5px;
     line-height: 5px;
     border-radius: 2.5px;
+    transition: max-width 0.1s ease-out;
   }
     
   .container { background: #fff; }  
