@@ -1,13 +1,12 @@
 
 import { SunPanelWidgetElement } from '@sun-panel/micro-app';
-import { html } from 'lit';
-import { style_widget, renderNotReady } from '../../utils/style';
+import { style_widget, renderNotReady, renderData } from '../../utils/style';
 import { md5 } from '../../utils/md5';
 import { INTERVAL_MIN } from '../../utils/const';
 
 export class OnePanelDockerContainerStatusWidget extends SunPanelWidgetElement {
   static properties = {
-    state: { type: Array },
+    data: { type: Array },
   };
 
   _title = "1Panel Container";
@@ -15,9 +14,7 @@ export class OnePanelDockerContainerStatusWidget extends SunPanelWidgetElement {
 
   constructor() {
     super();
-    this._title = "1Panel Container";
-
-    this.state = [];
+    this.data = [];
   }
 
   onInitialized() {
@@ -64,18 +61,18 @@ export class OnePanelDockerContainerStatusWidget extends SunPanelWidgetElement {
         }
       });
 
-      var data = response.data?.data;
-      var list = data
+      var resp = response.data;
+      var list = resp?.data
         .filter(x => containers.indexOf(x.name) != -1)
         .sort((a, b) => containers.indexOf(a.name) - containers.indexOf(b.name))
 
       if (list.length == 0) {
-        list = [{ name: "no container" }];
+        list = [{ name: "no container", state: "" }];
       }
 
-      this._ready = 1;
+      this.data = list.map(x => ({ type: "key-value", key: x.name, value: x.state }));
 
-      this.state = list;
+      this._ready = 1;
     } catch (error) {
       switch (error.type) {
         case 'microApp':
@@ -93,20 +90,7 @@ export class OnePanelDockerContainerStatusWidget extends SunPanelWidgetElement {
       return renderNotReady(this._title, this.spCtx);
     }
 
-    return html`
-      <div class="container" ?dark=${this.spCtx?.darkMode}>
-        <div class="title">
-          ${this._title}
-        </div>
-      ${this.state?.map(item => {
-      return html`
-        <div class="info-item">
-          <span class="label">${item.name}</span>
-          <span class="value">${item.state}</span>
-        </div>`
-    })}
-      </div>
-    `;
+    return renderData(this._title, this.data, this.spCtx);
   }
 
   static styles = style_widget;

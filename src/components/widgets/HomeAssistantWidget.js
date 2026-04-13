@@ -1,12 +1,11 @@
 
 import { SunPanelWidgetElement } from '@sun-panel/micro-app';
-import { html } from 'lit';
-import { style_widget, renderNotReady } from '../../utils/style';
+import { style_widget, renderNotReady, renderData } from '../../utils/style';
 import { INTERVAL_MIN } from '../../utils/const';
 
 export class HomeAssistantWidget extends SunPanelWidgetElement {
   static properties = {
-    content: { type: String },
+    data: { type: Array },
   };
 
   _title = "Home Assistant";
@@ -14,7 +13,7 @@ export class HomeAssistantWidget extends SunPanelWidgetElement {
 
   constructor() {
     super();
-    this.content = '';
+    this.data = [];
   }
 
   onInitialized() {
@@ -92,11 +91,21 @@ export class HomeAssistantWidget extends SunPanelWidgetElement {
         ]
       });
 
-      var data = response.data;
+      var resp = response.data;
+
+      this.data = resp.split("\n").map(item => {
+        var progress = this.extractProgress(item)
+        var kv = this.extractKeyValue(item)
+        if (progress != -1) {
+          return { type: "progress-bar", value: progress }
+        } else if (kv) {
+          return { type: "key-value", key: kv.key, value: kv.value }
+        } else {
+          return { type: "text", value: item }
+        }
+      });
 
       this._ready = 1;
-
-      this.content = data;
     } catch (error) {
       switch (error.type) {
         case 'microApp':
@@ -114,34 +123,7 @@ export class HomeAssistantWidget extends SunPanelWidgetElement {
       return renderNotReady(this._title, this.spCtx);
     }
 
-    return html`
-      <div class="container" ?dark=${this.spCtx?.darkMode}>
-        <div class="title">
-          ${this._title}
-        </div>
-    ${this.content.split("\n").map(item => {
-      var progress = this.extractProgress(item)
-      var kv = this.extractKeyValue(item)
-      if (progress != -1) {
-        return html`
-          <div class="progress-bar">
-            <div class="progress-bar-line" style="max-width: ${progress * 100}%"></div>
-          </div>`
-      } else if (kv) {
-        return html`
-          <div class="info-item">
-            <span class="label">${kv.key}</span>
-            <span class="value">${kv.value}</span>
-          </div>`
-      } else {
-        return html`
-          <div class="info-item">
-            <span class="value">${item}</span>
-          </div>`
-      }
-    })}
-      </div>
-    `;
+    return renderData(this._title, this.data, this.spCtx);
   }
 
   static styles = style_widget;

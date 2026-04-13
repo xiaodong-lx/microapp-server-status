@@ -46,7 +46,7 @@ export default defineConfig(async () => {
         allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
         credentials: true,
       },
-      allowedHosts: ["0.0.0.0"]
+      allowedHosts: true
     },
 
     build: {

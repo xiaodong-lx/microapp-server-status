@@ -1,21 +1,13 @@
 
 import { SunPanelWidgetElement } from '@sun-panel/micro-app';
-import { html } from 'lit';
-import { style_widget, renderNotReady } from '../../utils/style';
+import { style_widget, renderNotReady, renderData } from '../../utils/style';
 import { INTERVAL_MIN } from '../../utils/const';
 import { formatBytes, formatUptime } from '../../utils/function';
 
 export class PVEStatusWidget extends SunPanelWidgetElement {
   static properties = {
-    name: { type: String },
+    data: { type: Array },
     type: { type: String },
-    loadavg: { type: String },
-    cpu: { type: String },
-    cpu_percent: { type: String },
-    mem: { type: String },
-    mem_percent: { type: String },
-    uptime: { type: String },
-    status: { type: String },
   };
 
   _title = "Proxmox VE";
@@ -23,14 +15,7 @@ export class PVEStatusWidget extends SunPanelWidgetElement {
 
   constructor() {
     super();
-    this.name = '-';
-    this.loadavg = '-';
-    this.cpu = '-';
-    this.cpu_percent = '0';
-    this.mem = '-';
-    this.mem_percent = '0';
-    this.uptime = '-';
-    this.status = '-';
+    this.data = [];
   }
 
   onInitialized() {
@@ -92,27 +77,31 @@ export class PVEStatusWidget extends SunPanelWidgetElement {
         ]
       });
 
-      var data = response.data?.data;
-
-      this._ready = 1;
+      var resp = response.data;
 
       if (this.type == "node") {
-        this.name = node;
-        this.loadavg = data.loadavg.join(", ");
-        this.cpu = Math.round(data.cpu * 100, 0) + "%";
-        this.cpu_percent = Math.round(data.cpu * 100, 0);
-        this.mem = `${formatBytes(data.memory.used, 1)}/${formatBytes(data.memory.total, 1)}`;
-        this.mem_percent = parseFloat(data.memory.used) / parseFloat(data.memory.total) * 100;
-        this.uptime = formatUptime(data.uptime);
+        this.data = [
+          { type: "key-value", key: "Name", value: node },
+          { type: "key-value", key: "Loadavg", value: Math.round(resp?.data.cpu * 100, 0) + "%" },
+          { type: "key-value", key: "CPU", value: Math.round(resp?.data.cpu * 100, 0) + "%" },
+          { type: "progress-bar", value: resp?.data.cpu },
+          { type: "key-value", key: "RAM", value: `${formatBytes(resp?.data.memory.used, 1)}/${formatBytes(resp?.data.memory.total, 1)}` },
+          { type: "progress-bar", value: parseFloat(resp?.data.memory.used) / parseFloat(resp?.data.memory.total) },
+          { type: "key-value", key: "Uptime", value: formatUptime(resp?.data.uptime) },
+        ]
       } else if (this.type == "qemu" || this.type == "lxc") {
-        this.name = `${data.name} (${data.vmid})`;
-        this.cpu = Math.round(data.cpu * 100, 0) + "%";
-        this.cpu_percent = Math.round(data.cpu * 100, 0);
-        this.mem = `${formatBytes(data.mem, 1)}/${formatBytes(data.maxmem, 1)}`;
-        this.mem_percent = parseFloat(data.mem) / parseFloat(data.maxmem) * 100;
-        this.uptime = formatUptime(data.uptime);
-        this.status = data.status;
+        this.data = [
+          { type: "key-value", key: "Name", value: `${resp?.data.name} (${resp?.data.vmid})` },
+          { type: "key-value", key: "Status", value: resp?.data.status },
+          { type: "key-value", key: "CPU", value: Math.round(resp?.data.cpu * 100, 0) + "%" },
+          { type: "progress-bar", value: resp?.data.cpu },
+          { type: "key-value", key: "RAM", value: `${formatBytes(resp?.data.mem, 1)}/${formatBytes(resp?.data.maxmem, 1)}` },
+          { type: "progress-bar", value: parseFloat(resp?.data.mem) / parseFloat(resp?.data.maxmem) },
+          { type: "key-value", key: "Uptime", value: formatUptime(resp?.data.uptime) },
+        ]
       }
+
+      this._ready = 1;
     } catch (error) {
       switch (error.type) {
         case 'microApp':
@@ -130,45 +119,7 @@ export class PVEStatusWidget extends SunPanelWidgetElement {
       return renderNotReady(this._title, this.spCtx);
     }
 
-    return html`
-      <div class="container" ?dark=${this.spCtx?.darkMode}>
-        <div class="title">
-          ${this._title}
-        </div>
-        <div class="info-item">
-          <span class="label">Name</span>
-          <span class="value">${this.name}</span>
-        </div>
-        ${this.type == "qemu" || this.type == "lxc" ? html`
-        <div class="info-item">
-          <span class="label">Status</span>
-          <span class="value">${this.status}</span>
-        </div>` : ""}
-        ${this.type == "node" ? html`
-        <div class="info-item">
-          <span class="label">Loadavg</span>
-          <span class="value">${this.loadavg}</span>
-        </div>` : ""}
-        <div class="info-item">
-          <span class="label">CPU</span>
-          <span class="value">${this.cpu}</span>
-        </div>
-        <div class="progress-bar">
-          <div class="progress-bar-line" style="max-width: ${this.cpu_percent}%"></div>
-        </div>
-        <div class="info-item">
-          <span class="label">RAM</span>
-          <span class="value">${this.mem}</span>
-        </div>
-        <div class="progress-bar">
-          <div class="progress-bar-line" style="max-width: ${this.mem_percent}%"></div>
-        </div>
-        <div class="info-item">
-          <span class="label">Uptime</span>
-          <span class="value">${this.uptime}</span>
-        </div>
-      </div>
-    `;
+    return renderData(this._title, this.data, this.spCtx);
   }
 
   static styles = style_widget;

@@ -188,10 +188,10 @@ export const style_widget = css`
 `;
 
 export function renderNotReady(title, ctx) {
-  return render(title, "组件未设置或异常", ctx);
+  return renderInfo(title, "组件未设置或异常", ctx);
 }
 
-export function render(title, text, ctx) {
+export function renderInfo(title, text, ctx) {
   return html`
   <div class="container" ?dark=${ctx?.darkMode}>
     <div class="title">
@@ -201,6 +201,35 @@ export function render(title, text, ctx) {
       <span class="label"></span>
       <span class="value">${text}</span>
     </div>
+  </div>
+`;
+}
+
+export function renderData(title, data, ctx) {
+  return html`
+  <div class="container" ?dark=${ctx?.darkMode}>
+    <div class="title">
+      ${title}
+    </div>
+    ${data.map(item => {
+    if (item.type == "progress-bar") {
+      return html`
+    <div class="progress-bar">
+      <div class="progress-bar-line" style="max-width: ${item.value * 100}%"></div>
+    </div>`
+    } else if (item.type == "key-value") {
+      return html`
+    <div class="info-item">
+      <span class="label">${item.key}</span>
+      <span class="value">${item.value}</span>
+    </div>`
+    } else if (item.type == "text") {
+      return html`
+    <div class="info-item">
+      <span class="value">${item.value}</span>
+    </div>`
+    }
+  })}
   </div>
 `;
 }

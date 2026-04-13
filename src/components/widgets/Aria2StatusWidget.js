@@ -1,17 +1,12 @@
 
 import { SunPanelWidgetElement } from '@sun-panel/micro-app';
-import { html } from 'lit';
-import { style_widget, renderNotReady } from '../../utils/style';
+import { style_widget, renderNotReady, renderData } from '../../utils/style';
 import { INTERVAL_MIN } from '../../utils/const';
 import { formatBytes } from '../../utils/function';
 
 export class Aria2StatusWidget extends SunPanelWidgetElement {
   static properties = {
-    numActive: { type: String },
-    numWaiting: { type: String },
-    numStopped: { type: String },
-    downloadSpeed: { type: String },
-    uploadSpeed: { type: String },
+    data: { type: Array },
   };
 
   _title = "Aria2";
@@ -19,11 +14,7 @@ export class Aria2StatusWidget extends SunPanelWidgetElement {
 
   constructor() {
     super();
-    this.numActive = '-';
-    this.numWaiting = '-';
-    this.numStopped = '-';
-    this.downloadSpeed = '-';
-    this.uploadSpeed = '-';
+    this.data = [];
   }
 
   onInitialized() {
@@ -79,15 +70,16 @@ export class Aria2StatusWidget extends SunPanelWidgetElement {
         ]
       });
 
-      var data = response.data;
+      var resp = response.data;
+
+      this.data = [
+        { type: "key-value", key: "Active", value: resp?.result.numActive },
+        { type: "key-value", key: "Waiting", value: resp?.result.numWaiting },
+        { type: "key-value", key: "Stopped", value: resp?.result.numStopped },
+        { type: "key-value", key: "Speed", value: `${formatBytes(parseInt(resp?.result.downloadSpeed))}↓ / ${formatBytes(parseInt(resp?.result.uploadSpeed))}↑` },
+      ]
 
       this._ready = 1;
-
-      this.numActive = data.result.numActive;
-      this.numStopped = data.result.numStopped;
-      this.numWaiting = data.result.numWaiting;
-      this.uploadSpeed = formatBytes(parseInt(data.result.uploadSpeed));
-      this.downloadSpeed = formatBytes(parseInt(data.result.downloadSpeed));
     } catch (error) {
       switch (error.type) {
         case 'microApp':
@@ -105,29 +97,7 @@ export class Aria2StatusWidget extends SunPanelWidgetElement {
       return renderNotReady(this._title, this.spCtx);
     }
 
-    return html`
-      <div class="container" ?dark=${this.spCtx?.darkMode}>
-        <div class="title">
-          ${this._title}
-        </div>
-        <div class="info-item">
-          <span class="label">Active</span>
-          <span class="value">${this.numActive}</span>
-        </div>
-        <div class="info-item">
-          <span class="label">Waiting</span>
-          <span class="value">${this.numWaiting}</span>
-        </div>
-        <div class="info-item">
-          <span class="label">Stopped</span>
-          <span class="value">${this.numStopped}</span>
-        </div>
-        <div class="info-item">
-          <span class="label">Speed</span>
-          <span class="value">${this.downloadSpeed}↓ / ${this.uploadSpeed}↑</span>
-        </div>
-      </div>
-    `;
+    return renderData(this._title, this.data, this.spCtx);
   }
 
   static styles = style_widget;
