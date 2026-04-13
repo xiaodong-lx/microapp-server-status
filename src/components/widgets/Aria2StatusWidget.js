@@ -14,10 +14,11 @@ export class Aria2StatusWidget extends SunPanelWidgetElement {
 
   constructor() {
     super();
-    this.data = [];
   }
 
-  onInitialized() {
+  async onInitialized() {
+    this.data = await this.spCtx.api.localCache.user.get(this.spCtx.widgetInfo.widgetId + "_cache") || [];
+
     this.getServerStatus()
     var interval = this.spCtx.widgetInfo.config.interval;
 
@@ -80,6 +81,8 @@ export class Aria2StatusWidget extends SunPanelWidgetElement {
       ]
 
       this._ready = 1;
+
+      await this.spCtx.api.localCache.user.set(this.spCtx.widgetInfo.widgetId + "_cache", this.data, 3600 * 24 * 1);
     } catch (error) {
       switch (error.type) {
         case 'microApp':

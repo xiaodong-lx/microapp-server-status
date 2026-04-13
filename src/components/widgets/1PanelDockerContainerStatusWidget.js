@@ -14,10 +14,11 @@ export class OnePanelDockerContainerStatusWidget extends SunPanelWidgetElement {
 
   constructor() {
     super();
-    this.data = [];
   }
 
-  onInitialized() {
+  async onInitialized() {
+    this.data = await this.spCtx.api.localCache.user.get(this.spCtx.widgetInfo.widgetId + "_cache") || [];
+
     this.getContainers()
     var interval = this.spCtx.widgetInfo.config.interval;
 
@@ -73,6 +74,8 @@ export class OnePanelDockerContainerStatusWidget extends SunPanelWidgetElement {
       this.data = list.map(x => ({ type: "key-value", key: x.name, value: x.state }));
 
       this._ready = 1;
+
+      await this.spCtx.api.localCache.user.set(this.spCtx.widgetInfo.widgetId + "_cache", this.data, 3600 * 24 * 1);
     } catch (error) {
       switch (error.type) {
         case 'microApp':
