@@ -1,7 +1,7 @@
 export default {
   author: 'xiaodong',
   microAppId: 'xiaodong-server-status',
-  version: '1.0.5',
+  version: '1.1.0',
   entry: 'main.js',
   icon: 'logo.png',
   debug: false,
