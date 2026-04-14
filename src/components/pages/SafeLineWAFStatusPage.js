@@ -3,22 +3,11 @@ import { html } from 'lit';
 import { style_page } from '../../utils/style';
 import { INTERVAL_DEFAULT, INTERVAL_MAX, INTERVAL_MIN } from '../../utils/const';
 
-const TEMPLATE_DEFAULT = '{% set my_test_json = { \n\
-  "temperature": 25, \n\
-  "unit": "°C" \n\
-} %} \n\
-\n\
-The temperature is {{ my_test_json.temperature }} {{ my_test_json.unit }}. \n\
-\n\
-KV temperature:{{ my_test_json.temperature }} {{ my_test_json.unit }}\n\
-Progress: \n\
-PROGRESS 0.1'
-
-export class HomeAssistantPage extends SunPanelPageElement {
+export class SafeLineWAFStatusPage extends SunPanelPageElement {
   static properties = {
     widgetInfo: { type: Object },
     host: { type: String },
-    template: { type: String },
+    siteid: { type: String },
     interval: { type: Number }
   };
 
@@ -27,7 +16,7 @@ export class HomeAssistantPage extends SunPanelPageElement {
     const config = widgetInfo?.config || {};
     this.host = config.host ?? '';
     this.token = '';
-    this.template = config.template ?? TEMPLATE_DEFAULT;
+    this.siteid = config.siteid ?? '';
     this.interval = Math.min(Math.max(parseInt(config.interval ?? INTERVAL_DEFAULT), INTERVAL_MIN), INTERVAL_MAX);
     this.requestUpdate();
   }
@@ -38,10 +27,10 @@ export class HomeAssistantPage extends SunPanelPageElement {
       config: {
         ...this.widgetInfo.config,
         host: this.host.replace(/\/+$/, ""),
-        template: this.template,
+        siteid: this.siteid,
         interval: Math.min(Math.max(parseInt(this.interval ?? INTERVAL_DEFAULT), INTERVAL_MIN), INTERVAL_MAX)
       },
-    });
+    })
 
     if (this.token && resp.id) {
       this.spCtx.api.dataNode.user.setByKey("widgetConfig", resp.id + "_token", this.token);
@@ -58,7 +47,7 @@ export class HomeAssistantPage extends SunPanelPageElement {
           <h1>设置</h1>
           <form @submit="${(e) => e.preventDefault()}">
             <div class="form-section">
-              <div class="section-title">Home Assistant</div>
+              <div class="section-title">SafeLine WAF</div>
               <div class="form-group">
                 <label for="host">Host</label>
                 <input
@@ -66,7 +55,7 @@ export class HomeAssistantPage extends SunPanelPageElement {
                   name="host"
                   .value="${this.host}"
                   @input="${(e) => this.host = e.target.value}"
-                  placeholder="http://xxxxx"
+                  placeholder="Host"
                   class="styled-input"
                 >
               </div>
@@ -76,22 +65,22 @@ export class HomeAssistantPage extends SunPanelPageElement {
                   type="text"
                   name="token"
                   .value=""
-                  @input="${(e) => this.token = e.target.value}"
+                  @input="${(e) => this.token = e.target.value ?? this.token}"
                   placeholder="留空则不修改"
                   class="styled-input"
                 >
                 </div>
               <div class="form-group">
-                <label for="template">Template</label>
-                <textarea
-                  name="template"
-                  rows="5"
-                  .value="${this.template}"
-                  @input="${(e) => this.template = e.target.value}"
-                  placeholder=""
+                <label for="siteid">Site Id</label>
+                <input
+                  type="text"
+                  name="siteid"
+                  .value="${this.siteid}"
+                  @input="${(e) => this.siteid = e.target.value}"
+                  placeholder="Site Id"
                   class="styled-input"
-                ></textarea>
-              </div>
+                >
+                </div>
               <div class="form-group">
                 <label for="interval">刷新间隔（${INTERVAL_MIN}-${INTERVAL_MAX}）</label>
                 <input

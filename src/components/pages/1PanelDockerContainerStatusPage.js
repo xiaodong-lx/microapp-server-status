@@ -29,7 +29,7 @@ export class OnePanelDockerContainerStatusPage extends SunPanelPageElement {
       ...this.widgetInfo,
       config: {
         ...this.widgetInfo.config,
-        host: this.host,
+        host: this.host.replace(/\/+$/, ""),
         token: this.token,
         containers: this.containers,
         interval: Math.min(Math.max(parseInt(this.interval ?? INTERVAL_DEFAULT), INTERVAL_MIN), INTERVAL_MAX)
@@ -47,7 +47,7 @@ export class OnePanelDockerContainerStatusPage extends SunPanelPageElement {
           <h1>设置</h1>
           <form @submit="${(e) => e.preventDefault()}">
             <div class="form-section">
-              <div class="section-title">1Panel Docker Contaienrs</div>
+              <div class="section-title">1Panel Docker Contaienr</div>
               <div class="form-group">
                 <label for="host">Host</label>
                 <input

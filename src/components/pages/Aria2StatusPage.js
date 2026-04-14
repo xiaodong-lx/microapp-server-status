@@ -44,7 +44,7 @@ export class Aria2StatusPage extends SunPanelPageElement {
           <h1>设置</h1>
           <form @submit="${(e) => e.preventDefault()}">
             <div class="form-section">
-              <div class="section-title">Aria2 Server</div>
+              <div class="section-title">Aria2</div>
               <div class="form-group">
                 <label for="url">Url</label>
                 <input

@@ -30,7 +30,7 @@ export class PVEStatusPage extends SunPanelPageElement {
       ...this.widgetInfo,
       config: {
         ...this.widgetInfo.config,
-        host: this.host,
+        host: this.host.replace(/\/+$/, ""),
         node: this.node,
         qemuid: this.qemuid,
         lxcid: this.lxcid,
@@ -53,7 +53,7 @@ export class PVEStatusPage extends SunPanelPageElement {
           <h1>设置</h1>
           <form @submit="${(e) => e.preventDefault()}">
             <div class="form-section">
-              <div class="section-title">Proxmox VE Server</div>
+              <div class="section-title">Proxmox VE</div>
               <div class="form-group">
                 <label for="host">Host</label>
                 <input

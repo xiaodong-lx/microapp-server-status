@@ -10,6 +10,10 @@ import { HomeAssistantPage } from '../src/components/pages/HomeAssistantPage.js'
 import { OnePanelDockerContainerStatusWidget } from '../src/components/widgets/1PanelDockerContainerStatusWidget.js';
 import { OnePanelDockerContainerStatusPage } from '../src/components/pages/1PanelDockerContainerStatusPage.js';
 
+import { SafeLineWAFStatusWidget } from '../src/components/widgets/SafeLineWAFStatusWidget.js';
+import { SafeLineWAFStatusPage } from '../src/components/pages/SafeLineWAFStatusPage.js';
+
+
 export default {
   // =======================
   // 页面注册
@@ -26,6 +30,9 @@ export default {
     },
     '1panel-docker-container-config': {
       component: OnePanelDockerContainerStatusPage,
+    },
+    'safeline-waf-config': {
+      component: SafeLineWAFStatusPage,
     },
   },
 
@@ -49,6 +56,11 @@ export default {
       component: OnePanelDockerContainerStatusWidget,
       configComponentName: '1panel-docker-container-config',
       size: ['2x2'],
+    },
+    'safeline-waf-widget': {
+      component: SafeLineWAFStatusWidget,
+      configComponentName: 'safeline-waf-config',
+      size: ['2x2', '2x4'],
     },
   },
 };
