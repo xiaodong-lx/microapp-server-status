@@ -182,7 +182,7 @@ export const style_widget = css`
   .container[dark] { background: #333; }
   .container[dark] .title { color: #fff; }
   .container[dark] .value { color: #eee; }
-  .container[dark] .label { color: #aaa; }
+  .container[dark] .label { color: #bbb; }
   .container[dark] .progress-bar { background-color: #888; }
   .container[dark] .progress-bar-line { background-color: #eee; }
 `;

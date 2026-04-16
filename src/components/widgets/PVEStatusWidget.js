@@ -7,7 +7,6 @@ import { formatBytes, formatUptime } from '../../utils/function';
 export class PVEStatusWidget extends SunPanelWidgetElement {
   static properties = {
     data: { type: Array },
-    type: { type: String },
   };
 
   _title = "Proxmox VE";
@@ -52,13 +51,16 @@ export class PVEStatusWidget extends SunPanelWidgetElement {
       if (!host || !node) { this._ready = -1; return }
 
       var targetUrl = `${host}/api2/json/nodes/${node}/status`;
-      this.type = "node";
+      var type = "node";
+      var type_name = "节点";
       if (qemuid) {
         targetUrl = `${host}/api2/json/nodes/${node}/qemu/${qemuid}/status/current`
-        this.type = "qemu";
+        type = "vm";
+        type_name = "虚拟机"
       } else if (lxcid) {
         targetUrl = `${host}/api2/json/nodes/${node}/lxc/${lxcid}/status/current`
-        this.type = "lxc";
+        type = "lxc";
+        type_name = "容器";
       }
 
       const response = await this.spCtx.api.network.request({
@@ -80,25 +82,25 @@ export class PVEStatusWidget extends SunPanelWidgetElement {
 
       var resp = response.data;
 
-      if (this.type == "node") {
+      if (type == "node") {
         this.data = [
-          { type: "key-value", key: "Name", value: node },
-          { type: "key-value", key: "Loadavg", value: Math.round(resp?.data.cpu * 100, 0) + "%" },
+          { type: "key-value", key: "节点", value: node },
+          { type: "key-value", key: "负载", value: Math.round(resp?.data.cpu * 100, 0) + "%" },
           { type: "key-value", key: "CPU", value: Math.round(resp?.data.cpu * 100, 0) + "%" },
           { type: "progress-bar", value: resp?.data.cpu },
           { type: "key-value", key: "RAM", value: `${formatBytes(resp?.data.memory.used, 1)}/${formatBytes(resp?.data.memory.total, 1)}` },
           { type: "progress-bar", value: parseFloat(resp?.data.memory.used) / parseFloat(resp?.data.memory.total) },
-          { type: "key-value", key: "Uptime", value: formatUptime(resp?.data.uptime) },
+          { type: "key-value", key: "运行时间", value: formatUptime(resp?.data.uptime) },
         ]
-      } else if (this.type == "qemu" || this.type == "lxc") {
+      } else if (type == "vm" || type == "lxc") {
         this.data = [
-          { type: "key-value", key: "Name", value: `${resp?.data.name} (${resp?.data.vmid})` },
-          { type: "key-value", key: "Status", value: resp?.data.status },
+          { type: "key-value", key: type_name, value: `${resp?.data.name} (${resp?.data.vmid})` },
+          { type: "key-value", key: "状态", value: resp?.data.status },
           { type: "key-value", key: "CPU", value: Math.round(resp?.data.cpu * 100, 0) + "%" },
           { type: "progress-bar", value: resp?.data.cpu },
           { type: "key-value", key: "RAM", value: `${formatBytes(resp?.data.mem, 1)}/${formatBytes(resp?.data.maxmem, 1)}` },
           { type: "progress-bar", value: parseFloat(resp?.data.mem) / parseFloat(resp?.data.maxmem) },
-          { type: "key-value", key: "Uptime", value: formatUptime(resp?.data.uptime) },
+          { type: "key-value", key: "运行时间", value: formatUptime(resp?.data.uptime) },
         ]
       }
 

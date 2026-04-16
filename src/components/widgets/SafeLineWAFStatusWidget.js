@@ -4,13 +4,17 @@ import { style_widget, renderNotReady, renderData } from '../../utils/style';
 import { INTERVAL_MIN } from '../../utils/const';
 import { html } from 'lit';
 
+const COLOR_DEFENSE = "rgb(2, 191, 165)"
+const COLOR_AUDITED = "rgb(255, 191, 0)"
+const COLOR_OFFLINE = "rgb(254, 95, 87)"
+
 export class SafeLineWAFStatusWidget extends SunPanelWidgetElement {
   static properties = {
     data: { type: Array },
     type: { type: String },
   };
 
-  _title = "SafeLine WAF";
+  _title = "雷池WAF";
   _ready = -1;
 
   constructor() {
@@ -70,28 +74,30 @@ export class SafeLineWAFStatusWidget extends SunPanelWidgetElement {
 
       var resp = response.data;
 
-      var mode;
+      var mode = "未知";
+      var mode_color = "unset";
       switch (resp?.data.mode) {
         case 0:
-          mode = "Defense"
+          mode = "防护模式";
+          mode_color = COLOR_DEFENSE;
           break;
         case 1:
-          mode = "Offline"
+          mode = "维护模式";
+          mode_color = COLOR_OFFLINE;
           break;
         case 2:
-          mode = "Audited"
-          break;
-        default:
-          mode = "Unknown"
+          mode = "观察模式";
+          mode_color = COLOR_AUDITED;
           break;
       }
 
       this.data = [
-        { type: "key-value", key: "Name", value: html`<span style="display: flex; align-items: center;"><img src="${resp?.data.icon}" style="width: 16px; margin-right: 2px;">${resp?.data.comment} (id: ${resp?.data.id})</span>` },
-        { type: "key-value", key: "Mode", value: mode },
-        { type: "key-value", key: "Host", value: resp?.data.server_names.join(", ") },
-        { type: "key-value", key: "Port", value: resp?.data.ports.join(", ") },
-        { type: "key-value", key: "Request", value: `${resp?.data.req_value}/${resp?.data.denied_value}` },
+        { type: "key-value", key: "应用", value: html`<span style="display: flex; align-items: center;"><img src="${resp?.data.icon}" style="width: 16px; margin-right: 2px;">${resp?.data.comment}</span>` },
+        { type: "key-value", key: "模式", value: html`<span style="color: ${mode_color}">${mode}</span>` },
+        { type: "key-value", key: "域名", value: resp?.data.server_names.join(", ") },
+        { type: "key-value", key: "监听端口", value: resp?.data.ports.join(", ") },
+        { type: "key-value", key: "请求/拦截", value: `${resp?.data.req_value}/${resp?.data.denied_value}` },
+        { type: "key-value", key: "", value: `id: ${resp?.data.id}` },
       ]
 
       this._ready = 1;

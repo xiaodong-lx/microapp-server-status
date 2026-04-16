@@ -16,5 +16,5 @@ export function formatUptime(seconds) {
     const hours = Math.floor(seconds / 3600) % 24;
     const minutes = Math.floor(seconds / 60) % 60;
 
-    return `${days}d ${hours}h ${minutes}m`;
+    return `${days}天 ${hours}时 ${minutes}分`;
 }

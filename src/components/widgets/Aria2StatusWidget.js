@@ -74,10 +74,10 @@ export class Aria2StatusWidget extends SunPanelWidgetElement {
       var resp = response.data;
 
       this.data = [
-        { type: "key-value", key: "Active", value: resp?.result.numActive },
-        { type: "key-value", key: "Waiting", value: resp?.result.numWaiting },
-        { type: "key-value", key: "Stopped", value: resp?.result.numStopped },
-        { type: "key-value", key: "Speed", value: `${formatBytes(parseInt(resp?.result.downloadSpeed))}↓ / ${formatBytes(parseInt(resp?.result.uploadSpeed))}↑` },
+        { type: "key-value", key: "下载", value: resp?.result.numActive },
+        { type: "key-value", key: "等待", value: resp?.result.numWaiting },
+        { type: "key-value", key: "完成/停止", value: resp?.result.numStopped },
+        { type: "key-value", key: "", value: `${formatBytes(parseInt(resp?.result.downloadSpeed))}↓ / ${formatBytes(parseInt(resp?.result.uploadSpeed))}↑` },
       ]
 
       this._ready = 1;
