@@ -3,6 +3,7 @@ import { SunPanelWidgetElement } from '@sun-panel/micro-app';
 import { style_widget, renderNotReady, renderData } from '../../utils/style';
 import { INTERVAL_MIN } from '../../utils/const';
 import { formatBytes } from '../../utils/function';
+import { html } from 'lit-html';
 
 export class Aria2StatusWidget extends SunPanelWidgetElement {
   static properties = {
@@ -74,10 +75,11 @@ export class Aria2StatusWidget extends SunPanelWidgetElement {
       var resp = response.data;
 
       this.data = [
-        { type: "key-value", key: "下载", value: resp?.result.numActive },
+        { type: "key-value", key: "正在下载", value: resp?.result.numActive },
         { type: "key-value", key: "等待", value: resp?.result.numWaiting },
-        { type: "key-value", key: "完成/停止", value: resp?.result.numStopped },
-        { type: "key-value", key: "", value: `${formatBytes(parseInt(resp?.result.downloadSpeed))}↓ / ${formatBytes(parseInt(resp?.result.uploadSpeed))}↑` },
+        { type: "key-value", key: "已完成/停止", value: resp?.result.numStopped },
+        { type: "key-value", key: "下载", value: `${formatBytes(parseInt(resp?.result.downloadSpeed))}/s` },
+        { type: "key-value", key: "上传", value: `${formatBytes(parseInt(resp?.result.uploadSpeed))}/s` },
       ]
 
       this._ready = 1;

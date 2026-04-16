@@ -14,7 +14,7 @@ export class SafeLineWAFStatusWidget extends SunPanelWidgetElement {
     type: { type: String },
   };
 
-  _title = "雷池WAF";
+  _title = "雷池 WAF";
   _ready = -1;
 
   constructor() {
@@ -97,7 +97,7 @@ export class SafeLineWAFStatusWidget extends SunPanelWidgetElement {
         { type: "key-value", key: "域名", value: resp?.data.server_names.join(", ") },
         { type: "key-value", key: "监听端口", value: resp?.data.ports.join(", ") },
         { type: "key-value", key: "请求/拦截", value: `${resp?.data.req_value}/${resp?.data.denied_value}` },
-        { type: "key-value", key: "", value: `id: ${resp?.data.id}` },
+        { type: "key-value", key: "", value: html`<small>id: ${resp?.data.id}</small>` },
       ]
 
       this._ready = 1;

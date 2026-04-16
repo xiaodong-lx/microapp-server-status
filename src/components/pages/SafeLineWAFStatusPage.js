@@ -47,7 +47,7 @@ export class SafeLineWAFStatusPage extends SunPanelPageElement {
           <h1>设置</h1>
           <form @submit="${(e) => e.preventDefault()}">
             <div class="form-section">
-              <div class="section-title">SafeLine WAF</div>
+              <div class="section-title">雷池 WAF</div>
               <div class="form-group">
                 <label for="host">Host</label>
                 <input

@@ -88,7 +88,7 @@ export class PVEStatusWidget extends SunPanelWidgetElement {
           { type: "key-value", key: "负载", value: Math.round(resp?.data.cpu * 100, 0) + "%" },
           { type: "key-value", key: "CPU", value: Math.round(resp?.data.cpu * 100, 0) + "%" },
           { type: "progress-bar", value: resp?.data.cpu },
-          { type: "key-value", key: "RAM", value: `${formatBytes(resp?.data.memory.used, 1)}/${formatBytes(resp?.data.memory.total, 1)}` },
+          { type: "key-value", key: "内存", value: `${formatBytes(resp?.data.memory.used, 1)}/${formatBytes(resp?.data.memory.total, 1)}` },
           { type: "progress-bar", value: parseFloat(resp?.data.memory.used) / parseFloat(resp?.data.memory.total) },
           { type: "key-value", key: "运行时间", value: formatUptime(resp?.data.uptime) },
         ]
@@ -98,7 +98,7 @@ export class PVEStatusWidget extends SunPanelWidgetElement {
           { type: "key-value", key: "状态", value: resp?.data.status },
           { type: "key-value", key: "CPU", value: Math.round(resp?.data.cpu * 100, 0) + "%" },
           { type: "progress-bar", value: resp?.data.cpu },
-          { type: "key-value", key: "RAM", value: `${formatBytes(resp?.data.mem, 1)}/${formatBytes(resp?.data.maxmem, 1)}` },
+          { type: "key-value", key: "内存", value: `${formatBytes(resp?.data.mem, 1)}/${formatBytes(resp?.data.maxmem, 1)}` },
           { type: "progress-bar", value: parseFloat(resp?.data.mem) / parseFloat(resp?.data.maxmem) },
           { type: "key-value", key: "运行时间", value: formatUptime(resp?.data.uptime) },
         ]
