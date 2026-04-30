@@ -1,7 +1,7 @@
 export default {
   author: 'xiaodong',
   microAppId: 'xiaodong-server-status',
-  version: '1.1.1',
+  version: '1.1.2',
   entry: 'main.js',
   icon: 'logo.png',
   debug: false,
@@ -10,11 +10,6 @@ export default {
       appName: 'Server Status',
       description: '获取多种服务器状态',
       networkDescription: '连接到服务器'
-    },
-    'en-US': {
-      appName: 'Server Status',
-      description: 'get servers status',
-      networkDescription: 'connect to servers'
     }
   },
   permissions: [
